@@ -1,0 +1,33 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noImplicitAny": false
+  },
+  "include": ["src/**/*", "astro.config.mjs"],
+  "exclude": ["node_modules", "dist", ".astro"],
+  "references": [
+    { "path": "../../packages/audio" },
+    { "path": "../../packages/canvas-resizer" },
+    { "path": "../../packages/di" },
+    { "path": "../../packages/ecs" },
+    { "path": "../../packages/events-center" },
+    { "path": "../../packages/fsm" },
+    { "path": "../../packages/gameloop" },
+    { "path": "../../packages/hash" },
+    { "path": "../../packages/platform" },
+    { "path": "../../packages/platform-capacitor" },
+    { "path": "../../packages/platform-web" },
+    { "path": "../../packages/process" },
+    { "path": "../../packages/resources" },
+    { "path": "../../packages/screen-manager" },
+    { "path": "../../packages/subscriptions" },
+    { "path": "../../packages/token" }
+  ]
+}

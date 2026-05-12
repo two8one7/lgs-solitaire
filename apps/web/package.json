@@ -1,0 +1,45 @@
+{
+  "name": "@2817/web",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "build:broche": "PUBLIC_LGS_PACK=broche astro build",
+    "build:lakenona": "PUBLIC_LGS_PACK=lakenona astro build",
+    "build:westorange": "PUBLIC_LGS_PACK=westorange astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@2817/audio": "*",
+    "@2817/canvas-resizer": "*",
+    "@2817/di": "*",
+    "@2817/ecs": "*",
+    "@2817/events-center": "*",
+    "@2817/fsm": "*",
+    "@2817/gameloop": "*",
+    "@2817/hash": "*",
+    "@2817/platform": "*",
+    "@2817/platform-capacitor": "*",
+    "@2817/platform-web": "*",
+    "@2817/process": "*",
+    "@2817/resources": "*",
+    "@2817/screen-manager": "*",
+    "@2817/subscriptions": "*",
+    "@2817/token": "*",
+    "@astrojs/solid-js": "^6.0.1",
+    "@lgs/audio-personality": "*",
+    "@lgs/content-pack": "*",
+    "@lgs/personality-lint": "*",
+    "@lgs/render-personality": "*",
+    "solid-js": "^1.9.12"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/node": "^25.6.0",
+    "astro": "^5.18.1",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,61 @@
+---
+const title = "LGS Solitaire";
+const tagline = "Phase 2 scaffold ready";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={tagline} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={tagline} />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #1a1a1a;
+        color: #fff;
+        overflow: hidden;
+      }
+      #game {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <script>
+      const canvas = document.getElementById("game") as HTMLCanvasElement;
+      try {
+        const { boot } = await import("../boot");
+        await boot(canvas);
+      } catch (err) {
+        const e = err as Error;
+        (window as unknown as { __bootError: string }).__bootError =
+          (e?.stack || e?.message || String(err));
+        console.error("[boot]", err);
+        const pre = document.createElement("pre");
+        pre.style.position = "fixed";
+        pre.style.top = "0";
+        pre.style.left = "0";
+        pre.style.color = "#fff";
+        pre.style.background = "rgba(0,0,0,0.6)";
+        pre.style.padding = "12px";
+        pre.style.font = "12px monospace";
+        pre.style.maxWidth = "100vw";
+        pre.style.whiteSpace = "pre-wrap";
+        pre.textContent = e?.stack || e?.message || String(err);
+        document.body.appendChild(pre);
+      }
+    </script>
+  </body>
+</html>

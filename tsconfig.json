@@ -1,0 +1,49 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": false,
+		"noImplicitAny": false,
+		"skipLibCheck": true,
+		"lib": [
+			"ES2022",
+			"DOM",
+			"DOM.Iterable"
+		],
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"allowJs": true,
+		"checkJs": false,
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
+		"baseUrl": ".",
+		"paths": {
+			"@2817/gameloop": ["./packages/gameloop/index.ts"],
+			"@2817/subscriptions": ["./packages/subscriptions/index.ts"],
+			"@2817/screen-manager": ["./packages/screen-manager/src/index.ts"],
+			"@2817/canvas-resizer": ["./packages/canvas-resizer/index.ts"],
+			"@2817/audio": ["./packages/audio/src/index.ts"],
+			"@2817/di": ["./packages/di/src/index.ts"],
+			"@2817/ecs": ["./packages/ecs/src/index.ts"],
+			"@2817/events-center": ["./packages/events-center/src/index.ts"],
+			"@2817/fsm": ["./packages/fsm/src/index.ts"],
+			"@2817/hash": ["./packages/hash/src/index.ts"],
+			"@2817/platform": ["./packages/platform/src/index.ts"],
+			"@2817/platform-capacitor": ["./packages/platform-capacitor/src/index.ts"],
+			"@2817/platform-web": ["./packages/platform-web/src/index.ts"],
+			"@2817/process": ["./packages/process/src/index.ts"],
+			"@2817/resources": ["./packages/resources/src/index.ts"],
+			"@2817/token": ["./packages/token/src/index.ts"]
+		}
+	},
+	"include": [
+		"src/**/*",
+		"apps/*/src/**/*",
+		"packages/*/src/**/*",
+		"packages/*/index.ts"
+	]
+}

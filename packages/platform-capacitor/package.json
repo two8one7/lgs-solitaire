@@ -1,0 +1,22 @@
+{
+	"name": "@2817/platform-capacitor",
+	"version": "0.0.1",
+	"type": "module",
+	"main": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"@2817/platform": "*",
+		"@capacitor/app": "^8.1.0",
+		"@capacitor/core": "^8.3.1",
+		"@capacitor/haptics": "^8.0.2",
+		"@capacitor/preferences": "^8.0.1"
+	},
+	"devDependencies": {
+		"vitest": "^4.1.4"
+	},
+	"scripts": {
+		"test": "vitest run"
+	}
+}

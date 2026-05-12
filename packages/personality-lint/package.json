@@ -1,0 +1,11 @@
+{
+	"name": "@lgs/personality-lint",
+	"version": "0.0.1",
+	"type": "module",
+	"bin": {
+		"lgs-lint-no-publisher-ifs": "./lint-no-publisher-ifs.mjs"
+	},
+	"exports": {
+		"./lint-no-publisher-ifs": "./lint-no-publisher-ifs.mjs"
+	}
+}
