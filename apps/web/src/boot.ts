@@ -7,7 +7,7 @@
  * (onboarding / locked / challenge land later).
  */
 
-import { Application, Container, TextStyle } from 'pixi.js'
+import { Application, Assets, Container, TextStyle } from 'pixi.js'
 import { createResizer } from '@2817/canvas-resizer'
 import { createRaf } from '@2817/gameloop'
 import { createScreenManager } from '@2817/screen-manager'
@@ -30,7 +30,7 @@ import {
 } from './solitaire/screens'
 import { parseHex } from './solitaire/render/palette'
 import { createSolitaireAudio } from './solitaire/audio'
-import { loadDeclaredFontVariants, renderPersonalityPack } from './solitaire/screens/ui'
+import { assetUrl, loadDeclaredFontVariants, renderPersonalityPack } from './solitaire/screens/ui'
 
 function readModeFromUrl(): 'daily' | 'challenge' {
 	const params = new URLSearchParams(window.location.search)
@@ -43,6 +43,19 @@ export async function boot(canvas: HTMLCanvasElement): Promise<void> {
 	TextStyle.defaultTextStyle.padding = 56
 	await loadPackFonts(renderPersonalityPack(solitairePack))
 	await loadDeclaredFontVariants(solitairePack)
+
+	// Pre-register pack art into the Pixi Assets cache.
+	// Pixi v8's Texture.from(url) only resolves synchronously if the URL was
+	// previously loaded via Assets.load — it does not fetch on demand.
+	const packAssetUrls = [
+		assetUrl(solitairePack.brand.logoAsset),
+		assetUrl(solitairePack.theme.backgroundArt),
+		...(solitairePack.solitaire.feltTexture
+			? [assetUrl(solitairePack.solitaire.feltTexture)]
+			: []),
+		assetUrl(solitairePack.solitaire.cardBack.texture),
+	]
+	await Assets.load(packAssetUrls)
 
 	const app = new Application()
 	await app.init({
