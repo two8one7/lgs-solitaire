@@ -18,7 +18,12 @@ import type { IEventsCenter } from '@2817/events-center'
 import { executeMoveTo } from '../logic/checker'
 import type { CardLocation, SolitaireBoardState } from '../logic/types'
 import { CBoardState, CMovesCount } from '../components'
-import { MoveExecutedEventId, type MoveExecutedEventData } from '../events'
+import {
+	FoundationCompletedEventId,
+	MoveExecutedEventId,
+	type FoundationCompletedEventData,
+	type MoveExecutedEventData,
+} from '../events'
 import { syncCardPositions } from './sync-card-positions'
 
 export type ExecuteMoveDeps = {
@@ -46,6 +51,12 @@ export function createMoveExecutor(deps: ExecuteMoveDeps) {
 			{ id: MoveExecutedEventId, fromKind: from.type, toKind: to.type },
 			true,
 		)
+		if (to.type === 'foundation' && state.foundations[to.suit]!.length === 13) {
+			eventsCenter.dispatch<FoundationCompletedEventData>(
+				{ id: FoundationCompletedEventId, suit: to.suit },
+				true,
+			)
+		}
 		return undefined
 	}
 

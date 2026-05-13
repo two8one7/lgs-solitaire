@@ -13,12 +13,15 @@ import type { RenderContext } from './render-context'
 import { CBoardState, CSelectedCardRef } from '../components'
 import type { SolitaireBoardState } from '../logic/types'
 import {
+	CardTapEventId,
 	LocationTapEventId,
 	StockTapEventId,
+	type CardTapEventData,
 	type LocationTapEventData,
 	type StockTapEventData,
 } from '../events'
 import { createCardVisual, type CardVisual } from './card-visual'
+import { parseHex } from './palette'
 
 export type StockWasteRenderDeps = {
 	parent: Container
@@ -37,6 +40,10 @@ export function createStockWasteRender(deps: StockWasteRenderDeps) {
 	stockContainer.eventMode = 'static'
 	stockContainer.cursor = 'pointer'
 	stockContainer.on('pointertap', () => {
+		context.eventsCenter.dispatch<CardTapEventData>(
+			{ id: CardTapEventId, source: 'stock' },
+			true,
+		)
 		context.eventsCenter.dispatch<StockTapEventData>({ id: StockTapEventId }, true)
 	})
 	layer.addChild(stockContainer)
@@ -78,6 +85,10 @@ export function createStockWasteRender(deps: StockWasteRenderDeps) {
 	wasteContainer.eventMode = 'static'
 	wasteContainer.cursor = 'pointer'
 	wasteContainer.on('pointertap', () => {
+		context.eventsCenter.dispatch<CardTapEventData>(
+			{ id: CardTapEventId, source: 'waste' },
+			true,
+		)
 		context.eventsCenter.dispatch<LocationTapEventData>(
 			{ id: LocationTapEventId, location: { type: 'waste' }, depth: 0 },
 			true,
@@ -98,12 +109,20 @@ export function createStockWasteRender(deps: StockWasteRenderDeps) {
 		const sWi = context.entities.selection.worldIndex
 		const sIdx = context.entities.selection.index
 		const selPile = CSelectedCardRef.pile[sWi][sIdx] as string
+		const radius = context.pack.personalityTheme.shape.cornerRadius.md
+		const glowColor = parseHex(context.pack.palette.accentAlt)
+		const glowAlpha = context.pack.juice.glows.selectedAnswer.alpha ?? 0.95
 
 		// Stock placement
 		stockContainer.x = layout.stockRect.x
 		stockContainer.y = layout.stockRect.y
 		if (state.stock.length > 0) {
-			stockCard.apply({ suit: 0, value: 0, faceUp: false }, layout.cardWidth, layout.cardHeight)
+			stockCard.apply(
+				{ suit: 0, value: 0, faceUp: false },
+				layout.cardWidth,
+				layout.cardHeight,
+				{ radius, cardBackTexture: context.pack.solitaire.cardBack.texture },
+			)
 			stockEmptyHint.clear()
 			stockRecycleGlyph.visible = false
 			stockCount.text = `${state.stock.length}`
@@ -112,7 +131,7 @@ export function createStockWasteRender(deps: StockWasteRenderDeps) {
 			stockCount.visible = true
 		} else {
 			// Empty stock → recycle hint
-			stockCard.apply(null, layout.cardWidth, layout.cardHeight)
+			stockCard.apply(null, layout.cardWidth, layout.cardHeight, { radius })
 			stockRecycleGlyph.visible = true
 			stockRecycleGlyph.x = layout.cardWidth / 2
 			stockRecycleGlyph.y = layout.cardHeight / 2
@@ -126,9 +145,14 @@ export function createStockWasteRender(deps: StockWasteRenderDeps) {
 		if (state.waste.length > 0) {
 			const topIdx = state.waste[state.waste.length - 1]!
 			const card = state.cards[topIdx]!
-			wasteCard.apply(card, layout.cardWidth, layout.cardHeight, { highlighted: highlightWaste })
+			wasteCard.apply(card, layout.cardWidth, layout.cardHeight, {
+				highlighted: highlightWaste,
+				radius,
+				glowColor,
+				glowAlpha,
+			})
 		} else {
-			wasteCard.apply(null, layout.cardWidth, layout.cardHeight)
+			wasteCard.apply(null, layout.cardWidth, layout.cardHeight, { radius })
 		}
 	}
 

@@ -1,23 +1,16 @@
-/**
- * Complete scene — shown after the player wins (all 52 to foundations).
- *
- * Phase 3 keeps this minimal: time, par delta, streak, and a TITLE button.
- * Share button assembles a static template + writes to clipboard with a
- * small toast (no native dialogs — Pixi-only).
- */
-
-import { Container, Graphics, Text } from 'pixi.js'
+import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
 import type { FederatedPointerEvent } from 'pixi.js'
 import type { IScreen, IScreenManager } from '@2817/screen-manager'
-import { parseHex } from '../render/palette'
 import {
-	CPlayerTimeMs,
-	CTimeDeltaMs,
-	CCurrentStreak,
 	CBestStreak,
 	CBestTimeMs,
+	CCurrentStreak,
+	CPlayerTimeMs,
+	CTimeDeltaMs,
 } from '../components'
+import { parseHex } from '../render/palette'
 import type { SceneServices } from './scene-services'
+import { assetUrl, centerText, drawPanel, textStyle } from './ui'
 
 export type CompleteScene = IScreen & {
 	resize: (w: number, h: number) => void
@@ -29,130 +22,84 @@ function pad2(n: number): string {
 
 function formatMs(ms: number): string {
 	const totalSeconds = Math.floor(Math.max(0, ms) / 1000)
-	const minutes = Math.floor(totalSeconds / 60)
-	const seconds = totalSeconds % 60
-	return `${minutes}:${pad2(seconds)}`
+	return `${Math.floor(totalSeconds / 60)}:${pad2(totalSeconds % 60)}`
 }
 
 function formatDeltaSeconds(deltaMs: number): string {
-	const sign = deltaMs < 0 ? '−' : deltaMs > 0 ? '+' : '±'
-	const absSecs = Math.round(Math.abs(deltaMs) / 1000)
-	return `${sign}${absSecs}s`
+	const sign = deltaMs < 0 ? '-' : deltaMs > 0 ? '+' : '+/-'
+	return `${sign}${Math.round(Math.abs(deltaMs) / 1000)}s`
 }
 
 export function createCompleteScene(services: SceneServices): CompleteScene {
+	const { pack } = services
 	const display = new Container()
 	display.eventMode = 'static'
-	const pack = services.pack
 	const bg = new Graphics()
-	display.addChild(bg)
-
+	const confetti = new Graphics()
 	const panel = new Graphics()
-	display.addChild(panel)
-
-	const heading = new Text({
-		text: 'Solved!',
-		style: {
-			fontFamily: 'system-ui, sans-serif',
-			fontSize: 38,
-			fontWeight: '700',
-			fill: pack.palette.accent,
-		},
+	const logo = new Sprite(Texture.from(assetUrl(pack.brand.logoAsset)))
+	logo.anchor.set(0.5)
+	const publisherMark = new Text({
+		text: pack.brand.publisherName,
+		style: textStyle(pack, 'h2', { fontSize: 18, fill: pack.palette.accent, fontWeight: '800' }),
 	})
-
+	const heading = new Text({
+		text: pack.copy.completeTitle,
+		style: textStyle(pack, 'h2', { fontSize: 28, fill: pack.palette.text, align: 'center', wordWrap: true, wordWrapWidth: 500 }),
+	})
 	const timeLabel = new Text({
 		text: '',
-		style: {
-			fontFamily: 'ui-monospace, "JetBrains Mono", monospace',
-			fontSize: 36,
-			fontWeight: '700',
-			fill: pack.palette.textPrimary,
-		},
+		style: textStyle(pack, 'mono', { fontSize: 38, fill: pack.palette.text, fontWeight: '700' }),
 	})
-
 	const parLabel = new Text({
 		text: '',
-		style: {
-			fontFamily: 'system-ui, sans-serif',
-			fontSize: 18,
-			fontWeight: '600',
-			fill: pack.palette.textSecondary,
-		},
+		style: textStyle(pack, 'body', { fontSize: 17, fill: pack.palette.muted, fontWeight: '700' }),
 	})
-
 	const recordBadge = new Text({
 		text: 'NEW BEST TIME',
-		style: {
-			fontFamily: 'system-ui, sans-serif',
-			fontSize: 12,
-			fontWeight: '700',
-			fill: pack.palette.accent,
-			letterSpacing: 2,
-		},
+		style: textStyle(pack, 'small', { fontSize: 12, fill: pack.palette.accentAlt, fontWeight: '700', letterSpacing: 2 }),
 	})
-	recordBadge.visible = false
-
 	const streakLabel = new Text({
 		text: '',
-		style: {
-			fontFamily: 'system-ui, sans-serif',
-			fontSize: 16,
-			fontWeight: '600',
-			fill: pack.palette.textPrimary,
-		},
+		style: textStyle(pack, 'body', { fontSize: 16, fill: pack.palette.text }),
 	})
-
+	const footer = new Text({
+		text: pack.copy.completeFooter,
+		style: textStyle(pack, 'small', { fontSize: 13, fill: pack.palette.muted, align: 'center' }),
+	})
 	const shareBtn = new Container()
 	shareBtn.eventMode = 'static'
 	shareBtn.cursor = 'pointer'
 	const shareBg = new Graphics()
 	const shareLabel = new Text({
-		text: 'SHARE',
-		style: {
-			fontFamily: 'system-ui, sans-serif',
-			fontSize: 16,
-			fontWeight: '700',
-			fill: pack.palette.bg,
-		},
+		text: pack.copy.shareLabel.toUpperCase(),
+		style: textStyle(pack, 'body', { fontSize: 15, fill: pack.palette.panel, fontWeight: '700' }),
 	})
-	shareBtn.addChild(shareBg)
-	shareBtn.addChild(shareLabel)
-
-	const homeBtn = new Container()
-	homeBtn.eventMode = 'static'
-	homeBtn.cursor = 'pointer'
-	const homeBg = new Graphics()
-	const homeLabel = new Text({
+	shareBtn.addChild(shareBg, shareLabel)
+	const challengeBtn = new Container()
+	challengeBtn.eventMode = 'static'
+	challengeBtn.cursor = 'pointer'
+	const challengeBg = new Graphics()
+	const challengeLabel = new Text({
+		text: 'TRY CHALLENGE',
+		style: textStyle(pack, 'small', { fontSize: 12, fill: pack.palette.text, fontWeight: '700' }),
+	})
+	challengeBtn.addChild(challengeBg, challengeLabel)
+	const titleBtn = new Container()
+	titleBtn.eventMode = 'static'
+	titleBtn.cursor = 'pointer'
+	const titleBg = new Graphics()
+	const titleLabel = new Text({
 		text: 'TITLE',
-		style: {
-			fontFamily: 'system-ui, sans-serif',
-			fontSize: 13,
-			fontWeight: '700',
-			fill: pack.palette.textSecondary,
-		},
+		style: textStyle(pack, 'small', { fontSize: 12, fill: pack.palette.text, fontWeight: '700' }),
 	})
-	homeBtn.addChild(homeBg)
-	homeBtn.addChild(homeLabel)
-
+	titleBtn.addChild(titleBg, titleLabel)
 	const toast = new Text({
-		text: 'Copied to clipboard',
-		style: {
-			fontFamily: 'system-ui, sans-serif',
-			fontSize: 13,
-			fontWeight: '600',
-			fill: pack.palette.accent,
-		},
+		text: '',
+		style: textStyle(pack, 'small', { fontSize: 13, fill: pack.palette.accent, fontWeight: '700' }),
 	})
 	toast.visible = false
-
-	display.addChild(heading)
-	display.addChild(timeLabel)
-	display.addChild(parLabel)
-	display.addChild(recordBadge)
-	display.addChild(streakLabel)
-	display.addChild(shareBtn)
-	display.addChild(homeBtn)
-	display.addChild(toast)
+	display.addChild(bg, confetti, panel, logo, publisherMark, heading, timeLabel, parLabel, recordBadge, streakLabel, footer, shareBtn, challengeBtn, titleBtn, toast)
 
 	type Summary = {
 		playerTimeMs: number
@@ -177,16 +124,13 @@ export function createCompleteScene(services: SceneServices): CompleteScene {
 	function refresh(): void {
 		const s = readSummary()
 		timeLabel.text = formatMs(s.playerTimeMs)
-		parLabel.text = `${formatDeltaSeconds(s.timeDeltaMs)} vs par`
-		parLabel.style.fill =
-			s.timeDeltaMs < 0 ? pack.palette.accent : pack.palette.textSecondary
-
+		const delta = formatDeltaSeconds(s.timeDeltaMs)
+		parLabel.text = `${pack.copy.scoreLabel}: ${delta} vs par`
+		parLabel.style.fill = s.timeDeltaMs < 0 ? pack.palette.success : pack.palette.muted
 		streakLabel.text =
 			s.bestStreak > 0
-				? `Streak: ${s.currentStreak}  ·  Best: ${s.bestStreak}`
-				: `Streak: ${s.currentStreak}`
-
-		// Best-time badge: shown when current run equals the best (just set it).
+				? `${pack.copy.streakLabel}: ${s.currentStreak}  ·  Best: ${s.bestStreak}`
+				: `${pack.copy.streakLabel}: ${s.currentStreak}`
 		recordBadge.visible = s.bestMs > 0 && Math.abs(s.bestMs - s.playerTimeMs) < 5
 	}
 
@@ -204,12 +148,16 @@ export function createCompleteScene(services: SceneServices): CompleteScene {
 		}, 1800)
 	}
 
-	async function doShare(): Promise<void> {
+	function shareMessage(): string {
 		const s = readSummary()
-		const message =
-			`${pack.brand.publisherName} Daily Solitaire — ${formatMs(s.playerTimeMs)} ` +
-			`(${formatDeltaSeconds(s.timeDeltaMs)} vs par) · streak ${s.currentStreak}`
+		return pack.share.template
+			.replace('{time}', formatMs(s.playerTimeMs))
+			.replace('{parDelta}', `${formatDeltaSeconds(s.timeDeltaMs)} vs par`)
+			.replace('{streak}', String(s.currentStreak))
+	}
 
+	async function doShare(): Promise<void> {
+		const message = `${shareMessage()} ${pack.share.hashTag ?? ''}`.trim()
 		const nav = window.navigator as Navigator & {
 			share?: (data: { text: string; url?: string }) => Promise<void>
 		}
@@ -218,14 +166,26 @@ export function createCompleteScene(services: SceneServices): CompleteScene {
 				await nav.share({ text: message, url: window.location.href })
 				return
 			} catch {
-				// User cancelled or share unavailable; fall through to clipboard.
+				// User cancellation falls back to copy.
 			}
 		}
 		try {
 			await window.navigator.clipboard.writeText(message)
-			showToast('Copied to clipboard')
+			showToast(pack.copy.shareCopiedLabel)
 		} catch {
 			showToast('Copy failed')
+		}
+	}
+
+	function paintConfetti(w: number, h: number): void {
+		confetti.clear()
+		const colors = pack.winConfetti.colors
+		for (let i = 0; i < pack.winConfetti.count; i++) {
+			const color = parseHex(colors[i % colors.length]!)
+			const x = (i * 47) % Math.max(1, w)
+			const y = ((i * 83) % Math.max(1, h)) * 0.68
+			confetti.rect(x, y, 5 + (i % 3) * 2, 9 + (i % 4))
+			confetti.fill({ color, alpha: 0.18 + (i % 5) * 0.025 })
 		}
 	}
 
@@ -233,83 +193,82 @@ export function createCompleteScene(services: SceneServices): CompleteScene {
 		bg.clear()
 		bg.rect(0, 0, w, h)
 		bg.fill({ color: parseHex(pack.palette.bg) })
-
-		const panelW = Math.min(520, w - 32)
-		const panelH = Math.min(520, h - 48)
+		paintConfetti(w, h)
+		const panelW = Math.min(560, w - 32)
+		const panelH = Math.min(600, h - 44)
 		const panelX = (w - panelW) / 2
 		const panelY = (h - panelH) / 2
-		panel.clear()
-		panel.roundRect(panelX, panelY, panelW, panelH, 20)
-		panel.fill({ color: parseHex(pack.palette.feltColor), alpha: 0.55 })
-		panel.roundRect(panelX, panelY, panelW, panelH, 20)
-		panel.stroke({ color: parseHex(pack.palette.accent), width: 2, alpha: 0.35 })
-
-		let cursorY = panelY + 40
-
-		heading.x = (w - heading.width) / 2
-		heading.y = cursorY
-		cursorY = heading.y + heading.height + 28
-
-		timeLabel.x = (w - timeLabel.width) / 2
-		timeLabel.y = cursorY
-		cursorY = timeLabel.y + timeLabel.height + 8
-
-		parLabel.x = (w - parLabel.width) / 2
-		parLabel.y = cursorY
-		cursorY = parLabel.y + parLabel.height + 12
-
+		drawPanel(panel, panelX, panelY, panelW, panelH, pack)
+		logo.width = Math.min(230, panelW - 100)
+		logo.height = logo.width * (80 / 300)
+		logo.x = w / 2
+		logo.y = panelY + 52
+		centerText(publisherMark, panelX, panelW)
+		publisherMark.y = panelY + 35
+		heading.style.wordWrapWidth = panelW - 64
+		centerText(heading, panelX, panelW)
+		heading.y = logo.y + logo.height / 2 + 22
+		centerText(timeLabel, panelX, panelW)
+		timeLabel.y = heading.y + heading.height + 20
+		centerText(parLabel, panelX, panelW)
+		parLabel.y = timeLabel.y + timeLabel.height + 8
+		let y = parLabel.y + parLabel.height + 12
+		recordBadge.visible = recordBadge.visible
 		if (recordBadge.visible) {
-			recordBadge.x = (w - recordBadge.width) / 2
-			recordBadge.y = cursorY
-			cursorY = recordBadge.y + recordBadge.height + 12
+			centerText(recordBadge, panelX, panelW)
+			recordBadge.y = y
+			y += recordBadge.height + 12
 		}
-
-		streakLabel.x = (w - streakLabel.width) / 2
-		streakLabel.y = cursorY
-		cursorY = streakLabel.y + streakLabel.height + 36
-
-		const shareW = Math.min(360, panelW - 48)
+		centerText(streakLabel, panelX, panelW)
+		streakLabel.y = y
+		y += streakLabel.height + 24
+		centerText(footer, panelX, panelW)
+		footer.y = y
+		const shareW = Math.min(360, panelW - 64)
 		const shareH = 52
 		shareBg.clear()
-		shareBg.roundRect(0, 0, shareW, shareH, 26)
+		shareBg.roundRect(0, 0, shareW, shareH, pack.personalityTheme.shape.cornerRadius.pill)
 		shareBg.fill({ color: parseHex(pack.palette.accent) })
 		shareLabel.x = (shareW - shareLabel.width) / 2
 		shareLabel.y = (shareH - shareLabel.height) / 2
 		shareBtn.x = (w - shareW) / 2
-		shareBtn.y = cursorY
-		cursorY = shareBtn.y + shareH + 14
-
-		const hBtnW = 160
-		const hBtnH = 36
-		homeBg.clear()
-		homeBg.roundRect(0, 0, hBtnW, hBtnH, 18)
-		homeBg.stroke({ color: parseHex(pack.palette.textSecondary), width: 1.5, alpha: 0.5 })
-		homeLabel.x = (hBtnW - homeLabel.width) / 2
-		homeLabel.y = (hBtnH - homeLabel.height) / 2
-		homeBtn.x = (w - hBtnW) / 2
-		homeBtn.y = cursorY
-
+		shareBtn.y = panelY + panelH - 126
+		const smallW = 152
+		const smallH = 38
+		challengeBg.clear()
+		challengeBg.roundRect(0, 0, smallW, smallH, pack.personalityTheme.shape.cornerRadius.pill)
+		challengeBg.stroke({ color: parseHex(pack.palette.accent), width: 1.5, alpha: 0.45 })
+		challengeLabel.x = (smallW - challengeLabel.width) / 2
+		challengeLabel.y = (smallH - challengeLabel.height) / 2
+		challengeBtn.x = w / 2 - smallW - 6
+		challengeBtn.y = panelY + panelH - 58
+		titleBg.clear()
+		titleBg.roundRect(0, 0, smallW, smallH, pack.personalityTheme.shape.cornerRadius.pill)
+		titleBg.stroke({ color: parseHex(pack.palette.muted), width: 1.5, alpha: 0.45 })
+		titleLabel.x = (smallW - titleLabel.width) / 2
+		titleLabel.y = (smallH - titleLabel.height) / 2
+		titleBtn.x = w / 2 + 6
+		titleBtn.y = challengeBtn.y
 		toast.x = (w - toast.width) / 2
-		toast.y = panelY + panelH - 20
+		toast.y = shareBtn.y + shareH + 10
 	}
 
-	function hitTest(btn: Container, bgGfx: Graphics, x: number, y: number): boolean {
-		return (
-			x >= btn.x &&
-			x <= btn.x + bgGfx.width &&
-			y >= btn.y &&
-			y <= btn.y + bgGfx.height
-		)
+	function hit(btn: Container, g: Graphics, x: number, y: number): boolean {
+		return x >= btn.x && x <= btn.x + g.width && y >= btn.y && y <= btn.y + g.height
 	}
 
 	function onPointerDown(e: FederatedPointerEvent): void {
 		const x = e.global.x
 		const y = e.global.y
-		if (hitTest(shareBtn, shareBg, x, y)) {
+		if (hit(shareBtn, shareBg, x, y)) {
 			void doShare()
 			return
 		}
-		if (hitTest(homeBtn, homeBg, x, y)) {
+		if (hit(challengeBtn, challengeBg, x, y)) {
+			window.location.href = `${window.location.pathname}?mode=challenge`
+			return
+		}
+		if (hit(titleBtn, titleBg, x, y)) {
 			void services.manager().go('title')
 		}
 	}
@@ -334,12 +293,5 @@ export function createCompleteScene(services: SceneServices): CompleteScene {
 		display.destroy({ children: true })
 	}
 
-	return {
-		name: 'complete',
-		display,
-		enter,
-		exit,
-		destroy,
-		resize,
-	}
+	return { name: 'complete', display, enter, exit, destroy, resize }
 }

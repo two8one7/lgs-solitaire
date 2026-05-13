@@ -15,14 +15,20 @@
 
 import { createQuery } from '@2817/ecs'
 import type { IEntity, IWorld } from '@2817/ecs'
+import type { IEventsCenter } from '@2817/events-center'
 import { allTableauFaceUp, isWon } from '../logic/checker'
 import type { SolitaireBoardState } from '../logic/types'
 import { CBoardState, CCompletedFlag } from '../components'
 import type { MoveExecutor } from './move-executor'
 import { findFoundationFor } from './move-validator'
+import {
+	AutoCompleteTickEventId,
+	type AutoCompleteTickEventData,
+} from '../events'
 
 export type AutoCompleteDeps = {
 	world: IWorld
+	eventsCenter: IEventsCenter
 	boardEntity: IEntity
 	executor: MoveExecutor
 	/** Seconds between auto-flush steps. Default 0.06 (~16 fps of moves). */
@@ -30,7 +36,7 @@ export type AutoCompleteDeps = {
 }
 
 export function createAutoCompleteSystem(deps: AutoCompleteDeps) {
-	const { world, boardEntity, executor } = deps
+	const { world, eventsCenter, boardEntity, executor } = deps
 	const stepIntervalS = deps.stepIntervalS ?? 0.06
 
 	const eligibleQ = createQuery(world, {
@@ -91,6 +97,10 @@ export function createAutoCompleteSystem(deps: AutoCompleteDeps) {
 		const idx = state.piles[pileIdx]![state.piles[pileIdx]!.length - 1]!
 		const suit = state.cards[idx]!.suit
 		executor.execute({ type: 'pile', index: pileIdx }, { type: 'foundation', suit }, 1)
+		eventsCenter.dispatch<AutoCompleteTickEventData>(
+			{ id: AutoCompleteTickEventId },
+			true,
+		)
 	}
 
 	return { update }

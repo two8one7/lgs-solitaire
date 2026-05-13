@@ -1,41 +1,224 @@
 /**
- * Lake Nona stub pack — Phase 3 skeleton.
+ * Lake Nona / Nonahood News Phase 4 pack.
  *
- * Real publisher imagery + audio lands in Phase 5 (skin pass). Right now this
- * exists to prove the pack swap surface compiles and to give the renderer a
- * complete palette without inventing values inline.
- *
- * Palette is the GDD-default Lake Nona "green felt" baseline. The stranger-pair
- * test still applies in Phase 5; here we just need a valid pack shape.
+ * This is the first publisher-grade Solitaire skin: bright civic teal felt,
+ * sunrise-gold motion/selection language, light paper audio, and friendly
+ * neighborhood copy. Future skins must diverge through this same schema.
  */
 
 import type { SolitaireContentPack } from '../types'
 
 export const lakenonaPack: SolitaireContentPack = {
+	schemaVersion: 2,
 	slug: 'lakenona',
 	region: 'Lake Nona',
+	locale: 'en-US',
 	timeZone: 'America/New_York',
 	brand: {
 		publisherName: 'Nonahood News',
 		title: 'Lake Nona Solitaire',
-		tagline: 'A daily deal for the Lake Nona neighborhood.',
+		shortName: 'Nona Solitaire',
+		tagline: "Today's deck for the neighborhood.",
+		logoAsset: 'packs/lakenona/branding/logo.svg',
 	},
 	palette: {
-		bg: '#0d2a1a',
-		feltColor: '#1a4d2e',
-		cardFace: '#f8f4e9',
-		cardBack: '#2c4a6b',
-		textPrimary: '#f5f5f5',
-		textSecondary: '#c8d4cb',
-		suitRed: '#c43030',
-		suitBlack: '#1a1a1a',
-		accent: '#e9c46a',
+		bg: '#F3F7F5',
+		panel: '#FFFFFF',
+		text: '#1E2B3A',
+		muted: '#697783',
+		accent: '#18A0AA',
+		accentAlt: '#F5B642',
+		correct: '#2F8F4E',
+		incorrect: '#C33A3A',
+		neutral: '#D8E3E1',
+		success: '#2F8F4E',
+		cardFace: '#FFFDF7',
+		cardBack: '#0F6E72',
+		suitRed: '#C94747',
+		suitBlack: '#17313A',
 	},
-	cardBackAsset: 'solid:#2c4a6b',
-	feltColor: '#1a4d2e',
-	suitGlyphStyle: 'classic',
-	dailyMatch: {
+	theme: {
+		motif: 'lakefront sunrise, modern neighborhood geometry, polished civic energy',
+		surface: 'clean teal felt on a light editorial table',
+		uiTone: 'bright, friendly, modern',
+		backgroundArt: 'packs/lakenona/art/solitaire-background.webp',
+	},
+	solitaire: {
+		seedPrefix: 'lgs-solitaire:lakenona',
+		enabledVariants: ['klondike-1'],
+		rolloverHour: 5,
 		parTimeSeconds: 90,
-		rolloverHour: 4,
+		cardBack: {
+			texture: 'packs/lakenona/cards/card-back.png',
+			palette: ['#18A0AA', '#F5B642', '#FFFFFF'],
+		},
+		feltColor: '#0F6E72',
+		feltTexture: 'packs/lakenona/art/solitaire-background.webp',
+		pipGlyphSet: 'classic',
+		suitPalette: {
+			red: '#C94747',
+			black: '#17313A',
+			accent: '#F5B642',
+		},
+		table: {
+			edgeStyle: 'inlaid',
+			shadow: 'soft',
+		},
+		dealCorpusVersion: 'star-spangled-solitaire-v1',
+	},
+	layout: {
+		composition: 'centered-editorial',
+		background: {
+			kind: 'motif',
+			motifAsset: 'packs/lakenona/art/solitaire-background.webp',
+		},
+		slots: {
+			header: { height: 72, padding: [12, 16], maxWidth: 920 },
+			questionBlock: { height: 112, padding: [10, 12], maxWidth: 920 },
+			answerGrid: { maxWidth: 980, gap: 10 },
+			timerBar: { height: 28, maxWidth: 920 },
+			footer: { height: 44 },
+		},
+		responsive: {
+			narrowBreakpoint: 640,
+			narrowOverrides: { composition: 'stacked-vertical', cardScale: 0.78 },
+		},
+	},
+	personalityTheme: {
+		typography: {
+			headingStack: 'Montserrat, Arial, sans-serif',
+			bodyStack: 'Inter, Arial, sans-serif',
+			monoStack: 'JetBrains Mono, ui-monospace, monospace',
+			googleFonts: [
+				'Montserrat:wght@500;700;800',
+				'Inter:wght@400;500;600;700',
+				'JetBrains+Mono:wght@500;700',
+			],
+			scale: { h1: 1.08, h2: 1, body: 1, small: 0.96 },
+			weight: { heading: 800, body: 400, emphasis: 700 },
+			tracking: { heading: 0, body: 0, caps: 1.8 },
+		},
+		shape: {
+			cornerRadius: { sm: 8, md: 12, lg: 18, pill: 9999 },
+			strokeWidth: { thin: 1, regular: 2, bold: 3 },
+			primitive: 'rounded',
+			scale: 1,
+		},
+		motion: {
+			durationMultiplier: 0.92,
+			easing: {
+				entrance: 'easeOutCubic',
+				exit: 'easeInOutSine',
+				feedback: 'easeOutBack',
+				transition: 'easeInOutCubic',
+				ambient: 'easeInOutSine',
+			},
+		},
+		surface: {
+			panelFill: '#FFFFFF',
+			panelAlpha: 0.94,
+			vignette: false,
+			noiseTexture: false,
+		},
+	},
+	juice: {
+		particles: {
+			correct: {
+				kind: 'spark',
+				count: 28,
+				lifetimeMs: [500, 900],
+				speed: [70, 180],
+				spread: 'upward',
+				gravity: 60,
+				size: [3, 8],
+				shape: 'circle',
+				colors: ['accentAlt', 'success', '#FFFFFF'],
+				blend: 'screen',
+				fadeCurve: 'easeOutCubic',
+			},
+			incorrect: {
+				kind: 'dust',
+				count: 8,
+				lifetimeMs: [180, 320],
+				speed: [20, 60],
+				spread: 'radial',
+				gravity: 20,
+				size: [2, 4],
+				colors: ['incorrect', 'muted'],
+				blend: 'normal',
+				fadeCurve: 'easeOutQuad',
+			},
+			ambient: {
+				kind: 'bloom',
+				count: 4,
+				lifetimeMs: [1200, 1800],
+				speed: [4, 14],
+				spread: 'drift',
+				gravity: 0,
+				size: [6, 16],
+				colors: ['accent', 'accentAlt'],
+				blend: 'screen',
+				fadeCurve: 'easeInOutSine',
+			},
+		},
+		glows: {
+			selectedAnswer: { color: 'accentAlt', alpha: 0.42, blur: 10, pulseMs: 900 },
+			correctReveal: { color: 'success', alpha: 0.5, blur: 14, pulseMs: 650 },
+		},
+		transitions: {
+			questionEnter: { kind: 'fade', ms: 280, ease: 'easeOutCubic' },
+			questionExit: { kind: 'fade', ms: 180, ease: 'easeInCubic' },
+			answerHoverIn: { scale: 1.02, ms: 120, ease: 'easeOutQuad' },
+			answerPress: { scale: 1, ms: 180, ease: 'easeOutBack' },
+		},
+		shake: {
+			incorrect: { amplitude: 5, ms: 160, axis: 'horizontal' },
+		},
+	},
+	audio: {
+		events: {
+			'ui.hover': { sample: 'packs/lakenona/audio/card-pickup.wav', volume: 0.18 },
+			'ui.press': { sample: 'packs/lakenona/audio/place-valid.wav', volume: 0.34 },
+			'card.flip': { sample: 'packs/lakenona/audio/card-flip.wav', volume: 0.52, pitchVariance: 0.04 },
+			'card.pick-up': { sample: 'packs/lakenona/audio/card-pickup.wav', volume: 0.42 },
+			'card.place-valid': { sample: 'packs/lakenona/audio/place-valid.wav', volume: 0.48, pitchVariance: 0.03 },
+			'card.place-invalid': { sample: 'packs/lakenona/audio/place-invalid.wav', volume: 0.42 },
+			'card.stock-draw': { sample: 'packs/lakenona/audio/stock-draw.wav', volume: 0.38 },
+			'card.stock-reset': { sample: 'packs/lakenona/audio/stock-reset.wav', volume: 0.42 },
+			'foundation.complete': { sample: 'packs/lakenona/audio/foundation-complete.wav', volume: 0.6 },
+			'autocomplete.start': { sample: 'packs/lakenona/audio/autocomplete-card.wav', volume: 0.24 },
+			'autocomplete.card': { sample: 'packs/lakenona/audio/autocomplete-card.wav', volume: 0.32 },
+			'round.complete': { sample: 'packs/lakenona/audio/win.wav', volume: 0.75 },
+			'ambient.title': { sample: 'packs/lakenona/audio/ambient.wav', volume: 0.2, loop: true },
+		},
+		mix: { master: 1, music: 0.7, sfx: 1 },
+	},
+	copy: {
+		playButton: "Deal today's deck",
+		completeTitle: "You cleared today's Lake Nona deck",
+		completeFooter: "Tomorrow's deck lands after sunrise.",
+		scoreLabel: 'Par delta',
+		shareLabel: 'Share result',
+		shareCopiedLabel: 'Copied to clipboard',
+		streakLabel: 'Daily streak',
+		onboardingTitle: 'Welcome to the neighborhood table',
+		onboardingCards: [
+			'Build down in alternating colors across the tableau.',
+			'Send aces up first, then stack each suit through king.',
+			'Clear the deck once a day to keep your local streak alive.',
+		],
+		lockedTitle: "Today's Lake Nona deck is already cleared",
+		lockedCta: 'Back to title',
+		challengeTitle: 'Challenge deck',
+		challengeBody: 'Replayable challenge mode keeps the same Lake Nona table and skips the daily lock.',
+	},
+	share: {
+		template: "I cleared today's Lake Nona Solitaire in {time}, {parDelta}. Streak: {streak}.",
+		hashTag: '#LakeNonaSolitaire',
+	},
+	winConfetti: {
+		colors: ['#18A0AA', '#F5B642', '#FFFFFF', '#2F8F4E'],
+		count: 90,
+		spread: 'upward',
 	},
 }

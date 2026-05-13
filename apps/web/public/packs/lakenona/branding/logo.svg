@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" role="img" aria-labelledby="title">
+  <title id="title">Nonahood News</title>
+  <rect width="300" height="80" rx="18" fill="#ffffff"/>
+  <path d="M25 50c18-25 37-25 55 0 18 24 37 24 55 0" fill="none" stroke="#18A0AA" stroke-width="7" stroke-linecap="round"/>
+  <path d="M52 24l11-12 11 12 14-5-5 14 12 11-16 2-8 14-8-14-16-2 12-11z" fill="#F5B642"/>
+  <text x="116" y="37" font-family="Montserrat, Arial, sans-serif" font-size="21" font-weight="800" fill="#17313A">Nonahood</text>
+  <text x="116" y="59" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="700" fill="#18A0AA">News</text>
+</svg>

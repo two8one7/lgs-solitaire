@@ -10,6 +10,7 @@ import type { SolitairePackPalette } from '../types'
 export type RenderPalette = {
 	bg: number
 	felt: number
+	panel: number
 	cardFace: number
 	cardBack: number
 	textPrimary: number
@@ -17,6 +18,12 @@ export type RenderPalette = {
 	suitRed: number
 	suitBlack: number
 	accent: number
+	accentAlt: number
+	correct: number
+	incorrect: number
+	neutral: number
+	success: number
+	[key: string]: number
 }
 
 /** Parse a `#rrggbb` (or `#rgb`) string to 0xrrggbb. */
@@ -37,13 +44,19 @@ export function parseHex(input: string): number {
 export function toRenderPalette(p: SolitairePackPalette): RenderPalette {
 	return {
 		bg: parseHex(p.bg),
-		felt: parseHex(p.feltColor),
+		felt: parseHex(p.cardBack),
+		panel: parseHex(p.panel),
 		cardFace: parseHex(p.cardFace),
 		cardBack: parseHex(p.cardBack),
-		textPrimary: parseHex(p.textPrimary),
-		textSecondary: parseHex(p.textSecondary),
+		textPrimary: parseHex(p.text),
+		textSecondary: parseHex(p.muted),
 		suitRed: parseHex(p.suitRed),
 		suitBlack: parseHex(p.suitBlack),
 		accent: parseHex(p.accent),
+		accentAlt: parseHex(p.accentAlt),
+		correct: parseHex(p.correct),
+		incorrect: parseHex(p.incorrect),
+		neutral: parseHex(p.neutral),
+		success: parseHex(p.success),
 	}
 }

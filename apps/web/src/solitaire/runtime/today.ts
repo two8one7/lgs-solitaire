@@ -1,7 +1,7 @@
 /**
  * Resolve the current "play day" in the publisher's timezone as YYYY-MM-DD.
  *
- * Pack's `dailyMatch.rolloverHour` shifts the boundary (e.g. 4 → day rolls
+ * Pack's `solitaire.rolloverHour` shifts the boundary (e.g. 4 → day rolls
  * at 4am local). Pure-ish: depends on `new Date()`, injectable via `now`.
  *
  * Verbatim from lgs-memory/runtime/today.ts — the play-day rollover is a

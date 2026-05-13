@@ -22,11 +22,14 @@ import type { RenderContext } from './render-context'
 import type { SolitaireBoardState } from '../logic/types'
 import { CBoardState, CSelectedCardRef, CSelectionRunLength } from '../components'
 import {
+	CardTapEventId,
 	LocationTapEventId,
+	type CardTapEventData,
 	type LocationTapEventData,
 } from '../events'
 import { tableauCardYOffset } from './layout'
 import { createCardVisual, type CardVisual } from './card-visual'
+import { parseHex } from './palette'
 
 export type TableauRenderDeps = {
 	parent: Container
@@ -58,6 +61,10 @@ export function createTableauRender(deps: TableauRenderDeps) {
 		v.container.eventMode = 'static'
 		v.container.cursor = 'pointer'
 		v.container.on('pointertap', () => {
+			context.eventsCenter.dispatch<CardTapEventData>(
+				{ id: CardTapEventId, source: 'tableau' },
+				true,
+			)
 			context.eventsCenter.dispatch<LocationTapEventData>(
 				{ id: LocationTapEventId, location: { type: 'pile', index: colIdx }, depth },
 				true,
@@ -80,6 +87,10 @@ export function createTableauRender(deps: TableauRenderDeps) {
 		const selColumn = CSelectedCardRef.column[sWi][sIdx] as number
 		const selDepth = CSelectedCardRef.depth[sWi][sIdx] as number
 		const selRun = (CSelectionRunLength.value[sWi][sIdx] as number) ?? 0
+		const radius = context.pack.personalityTheme.shape.cornerRadius.md
+		const glowColor = parseHex(context.pack.palette.accentAlt)
+		const glowAlpha = context.pack.juice.glows.selectedAnswer.alpha ?? 0.95
+		const selectedScale = context.pack.juice.transitions.answerHoverIn.scale ?? 1
 
 		for (let colIdx = 0; colIdx < 7; colIdx++) {
 			const pile = state.piles[colIdx]!
@@ -104,7 +115,14 @@ export function createTableauRender(deps: TableauRenderDeps) {
 					selColumn === colIdx &&
 					depth >= selDepth &&
 					depth < selDepth + Math.max(selRun, 1)
-				v.apply(card, layout.cardWidth, layout.cardHeight, { highlighted })
+				v.container.scale.set(highlighted ? selectedScale : 1)
+				v.apply(card, layout.cardWidth, layout.cardHeight, {
+					highlighted,
+					radius,
+					cardBackTexture: context.pack.solitaire.cardBack.texture,
+					glowColor,
+					glowAlpha,
+				})
 			}
 
 			// Empty pile slot — show a placeholder hit target for King drops.
@@ -113,7 +131,8 @@ export function createTableauRender(deps: TableauRenderDeps) {
 				v.container.x = 0
 				v.container.y = 0
 				v.container.visible = true
-				v.apply(null, layout.cardWidth, layout.cardHeight)
+				v.container.scale.set(1)
+				v.apply(null, layout.cardWidth, layout.cardHeight, { radius })
 			}
 
 			// Hide extra visuals beyond current pile length.

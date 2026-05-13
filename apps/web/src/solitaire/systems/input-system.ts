@@ -40,8 +40,12 @@ import {
 	CTimerRunning,
 } from '../components'
 import {
+	CardPickupEventId,
 	LocationTapEventId,
+	MoveRejectedEventId,
+	type CardPickupEventData,
 	type LocationTapEventData,
+	type MoveRejectedEventData,
 } from '../events'
 import type { CardLocation, PileType, SolitaireBoardState, Suit } from '../logic/types'
 import type { MoveExecutor } from './move-executor'
@@ -62,6 +66,12 @@ type Selection = {
 	column: number
 	depth: number
 	runLength: number
+}
+
+function pickupSource(sel: Selection): 'tableau' | 'waste' | 'foundation' {
+	if (sel.pile === 'foundation') return 'foundation'
+	if (sel.pile === 'waste') return 'waste'
+	return 'tableau'
 }
 
 export function createInputSystem(deps: InputSystemDeps) {
@@ -168,6 +178,10 @@ export function createInputSystem(deps: InputSystemDeps) {
 		if (sel.pile === '') {
 			if (tappedSel === null) return
 			writeSelection(tappedSel)
+			eventsCenter.dispatch<CardPickupEventData>(
+				{ id: CardPickupEventId, source: pickupSource(tappedSel) },
+				true,
+			)
 			startTimerIfNeeded()
 			return
 		}
@@ -205,9 +219,20 @@ export function createInputSystem(deps: InputSystemDeps) {
 		const count = sel.runLength > 0 ? sel.runLength : 1
 		const validateErr = validateMove(state, from, to, count)
 		if (validateErr) {
+			eventsCenter.dispatch<MoveRejectedEventData>(
+				{ id: MoveRejectedEventId, reason: validateErr },
+				true,
+			)
 			// Illegal target — try to swap selection if the new tap is selectable.
 			if (tappedSel !== null) {
 				writeSelection(tappedSel)
+				eventsCenter.dispatch<CardPickupEventData>(
+					{
+						id: CardPickupEventId,
+						source: pickupSource(tappedSel),
+					},
+					true,
+				)
 			} else {
 				clearSelection()
 			}

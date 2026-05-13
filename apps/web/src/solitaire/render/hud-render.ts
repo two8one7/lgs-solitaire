@@ -17,8 +17,6 @@ export type HudRenderDeps = {
 	context: RenderContext
 }
 
-const HUD_FONT = '"Helvetica Neue", Arial, sans-serif'
-
 function formatTime(ms: number): string {
 	const totalSeconds = Math.max(0, Math.floor(ms / 1000))
 	const m = Math.floor(totalSeconds / 60)
@@ -44,7 +42,7 @@ export function createHudRender(deps: HudRenderDeps) {
 		text: context.pack.brand.publisherName,
 		style: {
 			fill: context.palette.textPrimary,
-			fontFamily: HUD_FONT,
+			fontFamily: context.pack.personalityTheme.typography.headingStack,
 			fontSize: 16,
 			fontWeight: '700',
 		},
@@ -56,9 +54,9 @@ export function createHudRender(deps: HudRenderDeps) {
 		text: 'Moves 0',
 		style: {
 			fill: context.palette.textPrimary,
-			fontFamily: HUD_FONT,
+			fontFamily: context.pack.personalityTheme.typography.bodyStack,
 			fontSize: 14,
-			fontWeight: '600',
+			fontWeight: '700',
 		},
 	})
 	movesText.anchor.set(0.5, 0.5)
@@ -68,7 +66,7 @@ export function createHudRender(deps: HudRenderDeps) {
 		text: '0:00',
 		style: {
 			fill: context.palette.textPrimary,
-			fontFamily: HUD_FONT,
+			fontFamily: context.pack.personalityTheme.typography.monoStack,
 			fontSize: 14,
 			fontWeight: '700',
 		},
@@ -89,8 +87,22 @@ export function createHudRender(deps: HudRenderDeps) {
 		const elapsedMs = (CTimeElapsedMs.value[tWi][tIdx] as number) ?? 0
 
 		bg.clear()
-		bg.roundRect(layout.hud.x, layout.hud.y, layout.hud.width, layout.hud.height, 10)
-		bg.fill({ color: context.palette.felt, alpha: 0.75 })
+		bg.roundRect(
+			layout.hud.x,
+			layout.hud.y,
+			layout.hud.width,
+			layout.hud.height,
+			context.pack.personalityTheme.shape.cornerRadius.md,
+		)
+		bg.fill({ color: context.palette.panel, alpha: context.pack.personalityTheme.surface.panelAlpha })
+		bg.roundRect(
+			layout.hud.x,
+			layout.hud.y,
+			layout.hud.width,
+			layout.hud.height,
+			context.pack.personalityTheme.shape.cornerRadius.md,
+		)
+		bg.stroke({ color: context.palette.accentAlt, width: 1, alpha: 0.28 })
 
 		const midY = layout.hud.y + layout.hud.height / 2
 

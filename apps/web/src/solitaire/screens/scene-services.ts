@@ -9,6 +9,7 @@
 import type { IScreenManager } from '@2817/screen-manager'
 import type { SolitaireRuntime } from '../runtime'
 import type { SolitaireContentPack } from '../types'
+import type { SolitaireAudio } from '../audio'
 import type { SaveStore } from '../save/store'
 import type { Layout } from '../render/layout'
 import { computeLayout } from '../render/layout'
@@ -17,6 +18,8 @@ export type SceneServices = {
 	runtime: SolitaireRuntime
 	pack: SolitaireContentPack
 	store: SaveStore
+	audio: SolitaireAudio
+	mode: 'daily' | 'challenge'
 	today: string
 	getCanvasSize: () => { width: number; height: number }
 	/** Recompute layout from current canvas size. */
@@ -28,6 +31,8 @@ export type CreateSceneServicesOpts = {
 	runtime: SolitaireRuntime
 	pack: SolitaireContentPack
 	store: SaveStore
+	audio: SolitaireAudio
+	mode: 'daily' | 'challenge'
 	today: string
 	getCanvasSize: () => { width: number; height: number }
 	manager: () => IScreenManager
@@ -38,6 +43,8 @@ export function createSceneServices(opts: CreateSceneServicesOpts): SceneService
 		runtime: opts.runtime,
 		pack: opts.pack,
 		store: opts.store,
+		audio: opts.audio,
+		mode: opts.mode,
 		today: opts.today,
 		getCanvasSize: opts.getCanvasSize,
 		getLayout: () => {

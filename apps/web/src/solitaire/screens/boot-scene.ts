@@ -8,10 +8,11 @@
  * for Phase 3b/4 when it gets pushed in here.
  */
 
-import { Container, Graphics, Text } from 'pixi.js'
+import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
 import type { IScreen, IScreenManager } from '@2817/screen-manager'
 import { parseHex } from '../render/palette'
 import type { SceneServices } from './scene-services'
+import { assetUrl, textStyle } from './ui'
 
 export type BootScene = IScreen & {
 	resize: (w: number, h: number) => void
@@ -22,30 +23,20 @@ export function createBootScene(services: SceneServices): BootScene {
 	const pack = services.pack
 
 	const bg = new Graphics()
-	const title = new Text({
-		text: pack.brand.title,
-		style: {
-			fontFamily: 'system-ui, sans-serif',
-			fontSize: 28,
-			fontWeight: '700',
-			fill: pack.palette.textPrimary,
-			align: 'center',
-		},
-	})
+	const logo = new Sprite(Texture.from(assetUrl(pack.brand.logoAsset)))
+	logo.anchor.set(0.5)
+	logo.alpha = 0
 	const loading = new Text({
-		text: 'Loading…',
-		style: {
-			fontFamily: 'system-ui, sans-serif',
+		text: 'DEALING THE DAILY DECK',
+		style: textStyle(pack, 'small', {
 			fontSize: 12,
-			fontWeight: '600',
-			fill: pack.palette.textSecondary,
-			letterSpacing: 2,
+			fill: pack.palette.muted,
 			align: 'center',
-		},
+		}),
 	})
 
 	display.addChild(bg)
-	display.addChild(title)
+	display.addChild(logo)
 	display.addChild(loading)
 
 	function paintBg(w: number, h: number): void {
@@ -56,10 +47,13 @@ export function createBootScene(services: SceneServices): BootScene {
 
 	function resize(w: number, h: number): void {
 		paintBg(w, h)
-		title.x = (w - title.width) / 2
-		title.y = h / 2 - 30
+		const logoW = Math.min(300, w - 48)
+		logo.width = logoW
+		logo.height = logoW * (80 / 300)
+		logo.x = w / 2
+		logo.y = h / 2 - 24
 		loading.x = (w - loading.width) / 2
-		loading.y = title.y + title.height + 24
+		loading.y = logo.y + logo.height / 2 + 28
 	}
 
 	async function enter(_manager: IScreenManager): Promise<void> {
@@ -71,6 +65,8 @@ export function createBootScene(services: SceneServices): BootScene {
 		// One frame, then jump to title. Daily fetch already happened in boot.ts.
 		void (async () => {
 			await new Promise<void>((resolve) => setTimeout(resolve, 80))
+			logo.alpha = 1
+			await new Promise<void>((resolve) => setTimeout(resolve, 260))
 			await manager.go('title')
 		})()
 	}

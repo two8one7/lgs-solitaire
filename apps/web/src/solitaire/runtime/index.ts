@@ -86,6 +86,7 @@ export type SolitaireRuntimeOptions = {
 	getDate?: () => string
 	now?: () => number
 	initialSave?: Partial<SolitaireSaveSlot>
+	autoCompleteStepIntervalS?: number
 	saveStore: SaveStore
 	packSlug: string
 }
@@ -191,8 +192,10 @@ export function createSolitaireRuntime(
 
 	const autoComplete = createAutoCompleteSystem({
 		world,
+		eventsCenter,
 		boardEntity: board,
 		executor,
+		stepIntervalS: options.autoCompleteStepIntervalS,
 	})
 
 	const timerSystem = createTimerSystem(world)

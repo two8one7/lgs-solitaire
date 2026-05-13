@@ -15,10 +15,13 @@ import { CBoardState, CSelectedCardRef } from '../components'
 import type { SolitaireBoardState, Suit } from '../logic/types'
 import { isRedSuit, suitGlyph } from '../logic/deck'
 import {
+	CardTapEventId,
 	LocationTapEventId,
+	type CardTapEventData,
 	type LocationTapEventData,
 } from '../events'
 import { createCardVisual, type CardVisual } from './card-visual'
+import { parseHex } from './palette'
 
 export type FoundationRenderDeps = {
 	parent: Container
@@ -44,6 +47,10 @@ export function createFoundationRender(deps: FoundationRenderDeps) {
 		c.eventMode = 'static'
 		c.cursor = 'pointer'
 		c.on('pointertap', () => {
+			context.eventsCenter.dispatch<CardTapEventData>(
+				{ id: CardTapEventId, source: 'foundation' },
+				true,
+			)
 			context.eventsCenter.dispatch<LocationTapEventData>(
 				{
 					id: LocationTapEventId,
@@ -85,6 +92,9 @@ export function createFoundationRender(deps: FoundationRenderDeps) {
 		const sIdx = context.entities.selection.index
 		const selPile = CSelectedCardRef.pile[sWi][sIdx] as string
 		const selCol = CSelectedCardRef.column[sWi][sIdx] as number
+		const radius = context.pack.personalityTheme.shape.cornerRadius.md
+		const glowColor = parseHex(context.pack.palette.accentAlt)
+		const glowAlpha = context.pack.juice.glows.selectedAnswer.alpha ?? 0.95
 
 		for (let i = 0; i < 4; i++) {
 			const slot = slots[i]!
@@ -95,14 +105,19 @@ export function createFoundationRender(deps: FoundationRenderDeps) {
 			const found = state.foundations[i]!
 			const highlighted = selPile === 'foundation' && selCol === i
 			if (found.length === 0) {
-				slot.card.apply(null, rect.width, rect.height, { highlighted })
+				slot.card.apply(null, rect.width, rect.height, { highlighted, radius })
 				slot.suitHint.x = rect.width / 2
 				slot.suitHint.y = rect.height / 2
 				slot.suitHint.visible = true
 			} else {
 				const topIdx = found[found.length - 1]!
 				const card = state.cards[topIdx]!
-				slot.card.apply(card, rect.width, rect.height, { highlighted })
+				slot.card.apply(card, rect.width, rect.height, {
+					highlighted,
+					radius,
+					glowColor,
+					glowAlpha,
+				})
 				slot.suitHint.visible = false
 			}
 		}

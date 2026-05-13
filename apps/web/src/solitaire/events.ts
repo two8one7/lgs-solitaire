@@ -41,6 +41,19 @@ export interface StockTapEventData extends IEventData {
 }
 export const StockTapEventId = createTypedId<StockTapEventData>('solitaire:stock-tap')
 
+export interface CardTapEventData extends IEventData {
+	readonly id: typeof CardTapEventId
+	source: 'tableau' | 'waste' | 'foundation' | 'stock'
+}
+export const CardTapEventId = createTypedId<CardTapEventData>('solitaire:card-tap')
+
+export interface CardPickupEventData extends IEventData {
+	readonly id: typeof CardPickupEventId
+	source: 'tableau' | 'waste' | 'foundation'
+}
+export const CardPickupEventId =
+	createTypedId<CardPickupEventData>('solitaire:card-pickup')
+
 // ─── Logic → world (audit / save / fx) ───────────────────────────────────────
 
 export interface MoveExecutedEventData extends IEventData {
@@ -51,12 +64,34 @@ export interface MoveExecutedEventData extends IEventData {
 export const MoveExecutedEventId =
 	createTypedId<MoveExecutedEventData>('solitaire:move-executed')
 
+export interface MoveRejectedEventData extends IEventData {
+	readonly id: typeof MoveRejectedEventId
+	reason: string
+}
+export const MoveRejectedEventId =
+	createTypedId<MoveRejectedEventData>('solitaire:move-rejected')
+
 export interface StockCycledEventData extends IEventData {
 	readonly id: typeof StockCycledEventId
 	kind: 'draw' | 'recycle' | 'empty'
 }
 export const StockCycledEventId =
 	createTypedId<StockCycledEventData>('solitaire:stock-cycled')
+
+export interface FoundationCompletedEventData extends IEventData {
+	readonly id: typeof FoundationCompletedEventId
+	suit: number
+}
+export const FoundationCompletedEventId = createTypedId<FoundationCompletedEventData>(
+	'solitaire:foundation-completed',
+)
+
+export interface AutoCompleteTickEventData extends IEventData {
+	readonly id: typeof AutoCompleteTickEventId
+}
+export const AutoCompleteTickEventId = createTypedId<AutoCompleteTickEventData>(
+	'solitaire:auto-complete-tick',
+)
 
 export interface DailyCompleteEventData extends IEventData {
 	readonly id: typeof DailyCompleteEventId
