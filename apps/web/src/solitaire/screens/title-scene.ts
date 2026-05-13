@@ -48,10 +48,9 @@ export function createTitleScene(services: SceneServices): TitleScene {
 	const panel = new Graphics()
 	const logo = new Sprite(Texture.from(assetUrl(pack.brand.logoAsset)))
 	logo.anchor.set(0.5)
-	const publisherMark = new Text({
-		text: pack.brand.publisherName,
-		style: textStyle(pack, 'h2', { fontSize: 18, fill: pack.palette.accent, fontWeight: '800' }),
-	})
+	// publisherMark removed (lgs-solitaire#6): Lake Nona's logo SVG already bakes
+	// the publication name in. A future pack whose logo lacks publisher name will
+	// need a pack-config flag rather than a uniform top-stack.
 
 	const region = new Text({
 		text: pack.region.toUpperCase(),
@@ -105,7 +104,7 @@ export function createTitleScene(services: SceneServices): TitleScene {
 	})
 	playBtn.addChild(playBg, playLabel)
 
-	display.addChild(bg, ambient, panel, logo, publisherMark, region, title, tagline, dateLabel, streakText, bestText, playBtn)
+	display.addChild(bg, ambient, panel, logo, region, title, tagline, dateLabel, streakText, bestText, playBtn)
 
 	function readStats(): { current: number; best: number; bestMs: number } {
 		const st = services.runtime.entities.streakTracker
@@ -163,9 +162,6 @@ export function createTitleScene(services: SceneServices): TitleScene {
 		logo.height = logo.width * (80 / 300)
 		logo.x = w / 2
 		logo.y = panelY + 60
-
-		centerText(publisherMark, panelX, panelW)
-		publisherMark.y = panelY + 42
 
 		let cursorY = logo.y + logo.height / 2 + 20
 		centerText(region, panelX, panelW)
