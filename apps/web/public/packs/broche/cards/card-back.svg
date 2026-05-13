@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 168" role="img">
+  <defs>
+    <linearGradient id="wine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7A2638"/>
+      <stop offset="1" stop-color="#3A0E1A"/>
+    </linearGradient>
+    <pattern id="diamondGrid" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="14" y2="0" stroke="#C9A66B" stroke-width="0.4" opacity="0.4"/>
+      <line x1="0" y1="0" x2="0" y2="14" stroke="#C9A66B" stroke-width="0.4" opacity="0.4"/>
+    </pattern>
+  </defs>
+  <rect width="120" height="168" rx="8" fill="url(#wine)"/>
+  <rect x="6" y="6" width="108" height="156" rx="5" fill="url(#diamondGrid)"/>
+  <rect x="6" y="6" width="108" height="156" rx="5" fill="none" stroke="#C9A66B" stroke-width="0.9" opacity="0.7"/>
+  <!-- center medallion: monogram B in wreath -->
+  <circle cx="60" cy="84" r="22" fill="#3A0E1A" stroke="#C9A66B" stroke-width="0.9"/>
+  <circle cx="60" cy="84" r="17" fill="none" stroke="#C9A66B" stroke-width="0.5" opacity="0.6"/>
+  <text x="60" y="92" font-family="Playfair Display, Georgia, serif" font-size="22" font-weight="800" fill="#C9A66B" text-anchor="middle">B</text>
+  <!-- corner fleur-like ornaments -->
+  <g fill="#C9A66B" opacity="0.55">
+    <path d="M14 14 q4 -2 6 2 q-2 4 -6 -2"/>
+    <path d="M106 14 q-4 -2 -6 2 q2 4 6 -2"/>
+    <path d="M14 154 q4 2 6 -2 q-2 -4 -6 2"/>
+    <path d="M106 154 q-4 2 -6 -2 q2 -4 6 2"/>
+  </g>
+</svg>

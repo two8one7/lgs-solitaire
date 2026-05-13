@@ -221,6 +221,31 @@ export interface SolitaireShareBlock {
 	hashTag?: string
 }
 
+/**
+ * Optional decorative motif block driving scene-flow distinction.
+ *
+ * Packs that omit `flourish` get the original Lake Nona behavior byte-identical:
+ * title scene draws ambient bloom dots; no extra ornaments. Packs that specify a
+ * motif paint pack-distinct frame decoration (curtain edges for ballet, masthead
+ * rule for editorial, etc.) — separate from card/board rendering, so it doesn't
+ * affect game logic.
+ *
+ * `titleAccent` picks the title-scene flourish kind. `cornerOrnaments` toggles
+ * tiny corner accents on panels (matches editorial vs theatrical taste).
+ */
+export type SolitaireFlourishKind =
+	| 'none'
+	| 'curtain-edges'
+	| 'sunrise-rays'
+	| 'masthead-rule'
+
+export interface SolitaireFlourishBlock {
+	titleAccent: SolitaireFlourishKind
+	cornerOrnaments: boolean
+	color?: string
+	width?: number
+}
+
 export interface WinConfettiConfig {
 	colors: string[]
 	count: number
@@ -249,6 +274,7 @@ export interface SolitaireContentPack {
 	copy: SolitaireCopyBlock
 	share: SolitaireShareBlock
 	winConfetti: WinConfettiConfig
+	flourish?: SolitaireFlourishBlock
 }
 
 /** Per-publisher, per-date save record. */

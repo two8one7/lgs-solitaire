@@ -92,3 +92,96 @@ export function drawPanel(
 export function centerText(text: Text, x: number, width: number): void {
 	text.x = x + (width - text.width) / 2
 }
+
+/**
+ * Pack-driven title-scene flourish.
+ *
+ * Packs without a `flourish` block (e.g. Lake Nona) keep the original ambient
+ * bloom-dot pattern byte-identical. Packs that declare a flourish kind paint a
+ * distinct decorative frame — curtain valance + side draperies for theatrical
+ * packs, masthead double-rule for editorial packs, sunrise rays for civic
+ * packs — separate from card/board rendering, so it does not affect game logic.
+ *
+ * Carries the `scene flow` axis of the stranger-pair test: two packs whose
+ * title flourish differs become materially distinguishable on first paint.
+ */
+export function drawFlourish(
+	g: Graphics,
+	w: number,
+	h: number,
+	pack: SolitaireContentPack,
+): void {
+	const flourish = pack.flourish
+	const color = parseHex(flourish?.color ?? pack.palette.accentAlt)
+
+	if (!flourish || flourish.titleAccent === 'none') {
+		for (let i = 0; i < 6; i++) {
+			const x = (w * (i + 1)) / 7
+			const y = h * 0.16 + (i % 2) * 34
+			g.circle(x, y, 18 + i * 2)
+			g.fill({ color, alpha: 0.035 })
+		}
+		return
+	}
+
+	if (flourish.titleAccent === 'curtain-edges') {
+		const edgeWidth = flourish.width ?? Math.min(w * 0.18, 220)
+		const folds = 7
+		for (let i = 0; i < folds; i++) {
+			const t = i / (folds - 1)
+			const xLeft = t * edgeWidth
+			const xRight = w - t * edgeWidth
+			const alpha = 0.2 - i * 0.022
+			g.rect(xLeft - 2, 0, 4, h)
+			g.fill({ color, alpha })
+			g.rect(xRight - 2, 0, 4, h)
+			g.fill({ color, alpha })
+		}
+		const valanceH = Math.min(72, h * 0.09)
+		const scallops = 9
+		for (let i = 0; i < scallops; i++) {
+			const cx = (w * (i + 0.5)) / scallops
+			const halfWidth = (w / scallops) * 0.55
+			g.moveTo(cx - halfWidth, 0)
+			g.bezierCurveTo(
+				cx - halfWidth * 0.5,
+				valanceH * 0.95,
+				cx + halfWidth * 0.5,
+				valanceH * 0.95,
+				cx + halfWidth,
+				0,
+			)
+			g.lineTo(cx - halfWidth, 0)
+			g.fill({ color, alpha: 0.24 })
+		}
+		return
+	}
+
+	if (flourish.titleAccent === 'sunrise-rays') {
+		const cx = w / 2
+		const cy = h + 40
+		const rays = 11
+		const strokeWidth = flourish.width ?? 36
+		for (let i = 0; i < rays; i++) {
+			const angle = Math.PI + (Math.PI * (i + 0.5)) / rays
+			const x2 = cx + Math.cos(angle) * h * 1.4
+			const y2 = cy + Math.sin(angle) * h * 1.4
+			g.moveTo(cx, cy)
+			g.lineTo(x2, y2)
+			g.stroke({ color, alpha: 0.04, width: strokeWidth })
+		}
+		return
+	}
+
+	if (flourish.titleAccent === 'masthead-rule') {
+		const stripeY = Math.min(48, h * 0.06)
+		g.rect(0, stripeY, w, 2)
+		g.fill({ color, alpha: 0.65 })
+		g.rect(0, stripeY + 8, w, 1)
+		g.fill({ color, alpha: 0.3 })
+		g.rect(0, h - stripeY - 9, w, 1)
+		g.fill({ color, alpha: 0.3 })
+		g.rect(0, h - stripeY - 2, w, 2)
+		g.fill({ color, alpha: 0.65 })
+	}
+}

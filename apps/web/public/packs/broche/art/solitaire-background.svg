@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img">
+  <defs>
+    <radialGradient id="spot" cx="50%" cy="38%" r="55%">
+      <stop offset="0" stop-color="#3A0E1A"/>
+      <stop offset="0.55" stop-color="#1B0E14"/>
+      <stop offset="1" stop-color="#0C060A"/>
+    </radialGradient>
+    <linearGradient id="curtainL" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5C1A2B" stop-opacity="0.95"/>
+      <stop offset="0.6" stop-color="#3A0E1A" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#3A0E1A" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="curtainR" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#5C1A2B" stop-opacity="0.95"/>
+      <stop offset="0.6" stop-color="#3A0E1A" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#3A0E1A" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#spot)"/>
+  <!-- floor reflection sweep -->
+  <ellipse cx="640" cy="560" rx="520" ry="80" fill="#5C1A2B" opacity="0.16"/>
+  <!-- left curtain folds -->
+  <rect x="0" y="0" width="260" height="720" fill="url(#curtainL)"/>
+  <g opacity="0.5" fill="#C9A66B">
+    <rect x="20" y="0" width="2" height="720"/>
+    <rect x="62" y="0" width="2" height="720"/>
+    <rect x="108" y="0" width="2" height="720"/>
+    <rect x="156" y="0" width="2" height="720"/>
+    <rect x="206" y="0" width="2" height="720"/>
+  </g>
+  <!-- right curtain folds -->
+  <rect x="1020" y="0" width="260" height="720" fill="url(#curtainR)"/>
+  <g opacity="0.5" fill="#C9A66B">
+    <rect x="1074" y="0" width="2" height="720"/>
+    <rect x="1124" y="0" width="2" height="720"/>
+    <rect x="1172" y="0" width="2" height="720"/>
+    <rect x="1218" y="0" width="2" height="720"/>
+    <rect x="1258" y="0" width="2" height="720"/>
+  </g>
+  <!-- valance scallops along top -->
+  <g fill="#5C1A2B" opacity="0.85">
+    <path d="M0 0 Q70 70 140 0 Z"/>
+    <path d="M140 0 Q210 70 280 0 Z"/>
+    <path d="M280 0 Q350 70 420 0 Z"/>
+    <path d="M420 0 Q490 70 560 0 Z"/>
+    <path d="M560 0 Q630 70 700 0 Z"/>
+    <path d="M700 0 Q770 70 840 0 Z"/>
+    <path d="M840 0 Q910 70 980 0 Z"/>
+    <path d="M980 0 Q1050 70 1120 0 Z"/>
+    <path d="M1120 0 Q1190 70 1280 0 Z"/>
+  </g>
+  <!-- gold trim under valance -->
+  <path d="M0 60 Q70 110 140 60 Q210 110 280 60 Q350 110 420 60 Q490 110 560 60 Q630 110 700 60 Q770 110 840 60 Q910 110 980 60 Q1050 110 1120 60 Q1190 110 1280 60" stroke="#C9A66B" stroke-width="1.5" fill="none" opacity="0.6"/>
+</svg>

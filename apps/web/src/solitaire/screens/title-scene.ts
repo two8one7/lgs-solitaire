@@ -4,7 +4,7 @@ import type { IScreen, IScreenManager } from '@2817/screen-manager'
 import { parseHex } from '../render/palette'
 import { CBestStreak, CBestTimeMs, CCurrentStreak } from '../components'
 import type { SceneServices } from './scene-services'
-import { assetUrl, centerText, drawPanel, textStyle } from './ui'
+import { assetUrl, centerText, drawFlourish, drawPanel, textStyle } from './ui'
 
 export type TitleScene = IScreen & {
 	resize: (w: number, h: number) => void
@@ -144,13 +144,7 @@ export function createTitleScene(services: SceneServices): TitleScene {
 		bg.rect(0, 0, w, h)
 		bg.fill({ color: parseHex(pack.palette.bg) })
 		ambient.clear()
-		const particleColor = parseHex(pack.palette.accentAlt)
-		for (let i = 0; i < 6; i++) {
-			const x = (w * (i + 1)) / 7
-			const y = h * 0.16 + (i % 2) * 34
-			ambient.circle(x, y, 18 + i * 2)
-			ambient.fill({ color: particleColor, alpha: 0.035 })
-		}
+		drawFlourish(ambient, w, h, pack)
 
 		const panelW = Math.min(560, w - 32)
 		const panelH = Math.min(560, h - 48)

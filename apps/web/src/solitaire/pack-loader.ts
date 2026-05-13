@@ -9,6 +9,7 @@
 import { z } from 'zod'
 import type { SolitaireContentPack } from './types'
 import { lakenonaPack } from './packs/lakenona'
+import { brochePack } from './packs/broche'
 
 export class SolitairePackError extends Error {}
 
@@ -299,6 +300,14 @@ const SolitairePackSchema = z.object({
 		count: z.number().int().positive(),
 		spread: z.enum(['radial', 'upward']),
 	}),
+	flourish: z
+		.object({
+			titleAccent: z.enum(['none', 'curtain-edges', 'sunrise-rays', 'masthead-rule']),
+			cornerOrnaments: z.boolean(),
+			color: z.string().optional(),
+			width: z.number().optional(),
+		})
+		.optional(),
 })
 
 export function validateSolitairePack(raw: unknown): SolitaireContentPack {
@@ -323,6 +332,8 @@ function loadPackBySlug(slug: string): SolitaireContentPack {
 	switch (slug) {
 		case 'lakenona':
 			return validateSolitairePack(lakenonaPack)
+		case 'broche':
+			return validateSolitairePack(brochePack)
 		default:
 			throw new SolitairePackError(
 				`unknown solitaire pack slug '${slug}' — register it in pack-loader.ts`,
