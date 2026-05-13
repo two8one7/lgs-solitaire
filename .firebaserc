@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "tommyato-deployments"
+  },
+  "targets": {
+    "tommyato-deployments": {
+      "hosting": {
+        "lakenona": [
+          "lgs-solitaire-lakenona"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
