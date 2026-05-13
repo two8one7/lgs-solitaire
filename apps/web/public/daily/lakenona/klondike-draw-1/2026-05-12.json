@@ -1,0 +1,8 @@
+{
+  "date": "2026-05-12",
+  "drawSize": 1,
+  "deck": "2D,12C,13H,1S,13S,12D,2S,6S,7S,5C,1H,4H,10C,3S,11D,6H,6C,7C,4S,7D,8C,3D,12S,6D,13C,9D,5H,5S,4C,2C,8D,7H,1D,8S,2H,9H,11H,4D,9S,9C,11C,3H,10S,11S,10D,1C,10H,8H,5D,3C,12H,13D",
+  "type": "klondike-1",
+  "parTimeSeconds": 90,
+  "source": "star-spangled-solitaire/test-deck.json — solvable corpus seed; replaced by daily-bake CLI in Phase 3b/4."
+}
