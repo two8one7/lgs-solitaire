@@ -1,6 +1,10 @@
 ---
-const title = "LGS Solitaire";
-const tagline = "Phase 2 scaffold ready";
+// Build-time pack-themed metadata (lgs-solitaire#7).
+// Reads pack via the same loader the canvas uses; PUBLIC_LGS_PACK env var
+// (defaults to 'lakenona') decides which pack hydrates.
+import { solitairePack } from "../solitaire/pack-loader";
+const title = solitairePack.brand.title;
+const tagline = solitairePack.brand.tagline;
 ---
 
 <!doctype html>
