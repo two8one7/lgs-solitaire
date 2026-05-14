@@ -7,6 +7,9 @@
       "hosting": {
         "lakenona": [
           "lgs-solitaire-lakenona"
+        ],
+        "broche": [
+          "lgs-solitaire-broche"
         ]
       }
     }
