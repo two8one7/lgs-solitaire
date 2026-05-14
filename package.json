@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=@2817/web",
+    "prebuild": "npm run lint",
     "build": "npm run build --workspace=@2817/web",
     "preview": "npm run preview --workspace=@2817/web",
     "typecheck": "tsc --noEmit",
