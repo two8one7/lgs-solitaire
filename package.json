@@ -3,15 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "LGS Solitaire — daily Klondike solitaire for Local Games Service publishers.",
-  "workspaces": ["apps/*", "packages/*"],
+  "description": "LGS Solitaire \u2014 daily Klondike solitaire for Local Games Service publishers.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "npm run dev --workspace=@2817/web",
     "build": "npm run build --workspace=@2817/web",
     "preview": "npm run preview --workspace=@2817/web",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "node packages/personality-lint/lint-no-publisher-ifs.mjs apps/web/src"
+    "lint": "npm run lint:no-publisher-ifs && npm run lint:no-literal-title",
+    "lint:no-publisher-ifs": "node packages/personality-lint/lint-no-publisher-ifs.mjs apps/web/src",
+    "lint:no-literal-title": "node packages/personality-lint/lint-no-literal-title.mjs apps/web/src/pages/index.astro"
   },
   "dependencies": {
     "pixi.js": "^8.14.3",
