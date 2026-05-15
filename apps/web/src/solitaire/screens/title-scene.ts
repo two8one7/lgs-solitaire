@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
+import { Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
 import type { FederatedPointerEvent } from 'pixi.js'
 import type { IScreen, IScreenManager } from '@2817/screen-manager'
 import { parseHex } from '../render/palette'
@@ -46,8 +46,23 @@ export function createTitleScene(services: SceneServices): TitleScene {
 	const bg = new Graphics()
 	const ambient = new Graphics()
 	const panel = new Graphics()
-	const logo = new Sprite(Texture.from(assetUrl(pack.brand.logoAsset)))
+	let logoFallback = false
+	const logo = new Sprite(Texture.EMPTY)
+	logo.visible = false
 	logo.anchor.set(0.5)
+	// Fallback wordmark rendered in the logo slot when logoAsset fails to load.
+	const wordmark = new Text({
+		text: pack.brand.title,
+		style: textStyle(pack, 'h1', {
+			fontSize: 30,
+			fill: pack.palette.accent,
+			align: 'center',
+			wordWrap: true,
+			wordWrapWidth: 240,
+		}),
+	})
+	wordmark.anchor.set(0.5, 0.5)
+	wordmark.visible = false
 	// publisherMark removed (lgs-solitaire#6): Lake Nona's logo SVG already bakes
 	// the publication name in. A future pack whose logo lacks publisher name will
 	// need a pack-config flag rather than a uniform top-stack.
@@ -104,7 +119,7 @@ export function createTitleScene(services: SceneServices): TitleScene {
 	})
 	playBtn.addChild(playBg, playLabel)
 
-	display.addChild(bg, ambient, panel, logo, region, title, tagline, dateLabel, streakText, bestText, playBtn)
+	display.addChild(bg, ambient, panel, logo, wordmark, region, title, tagline, dateLabel, streakText, bestText, playBtn)
 
 	function readStats(): { current: number; best: number; bestMs: number } {
 		const st = services.runtime.entities.streakTracker
@@ -157,7 +172,17 @@ export function createTitleScene(services: SceneServices): TitleScene {
 		logo.x = w / 2
 		logo.y = panelY + 60
 
-		let cursorY = logo.y + logo.height / 2 + 20
+		logo.visible = !logoFallback
+		if (logoFallback) {
+			wordmark.visible = true
+			wordmark.text = pack.brand.title
+			wordmark.position.set(w / 2, logo.y)
+			wordmark.style.wordWrapWidth = Math.min(240, panelW - 100)
+		} else {
+			wordmark.visible = false
+		}
+
+		let cursorY = logoFallback ? logo.y + 35 + 20 : logo.y + logo.height / 2 + 20
 		centerText(region, panelX, panelW)
 		region.y = cursorY
 		cursorY += region.height + 6
@@ -220,6 +245,23 @@ export function createTitleScene(services: SceneServices): TitleScene {
 	function destroy(): void {
 		display.destroy({ children: true })
 	}
+
+	// Async logo load — best-effort. On success: reveal logo. On failure: activate wordmark fallback.
+	void (async () => {
+		try {
+			const tex = await Assets.load<Texture>(assetUrl(pack.brand.logoAsset))
+			logo.texture = tex
+			logo.visible = true
+		} catch (err) {
+			console.warn(
+				`[lgs-solitaire] ${pack.slug}: logo asset unavailable (${pack.brand.logoAsset}) — rendering wordmark fallback`,
+				err,
+			)
+			logoFallback = true
+			const { width, height } = services.getCanvasSize()
+			resize(width, height)
+		}
+	})()
 
 	return { name: 'title', display, enter, exit, destroy, resize }
 }
