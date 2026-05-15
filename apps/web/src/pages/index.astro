@@ -16,7 +16,7 @@ const tagline = solitairePack.brand.tagline;
     <meta name="description" content={tagline} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={tagline} />
-    <style>
+    <style define:vars={{ packBg: solitairePack.palette.bg, packText: solitairePack.palette.text }}>
       * {
         margin: 0;
         padding: 0;
@@ -24,8 +24,8 @@ const tagline = solitairePack.brand.tagline;
       }
       body {
         font-family: system-ui, -apple-system, sans-serif;
-        background: #1a1a1a;
-        color: #fff;
+        background: var(--packBg, #1a1a1a);
+        color: var(--packText, #fff);
         overflow: hidden;
       }
       #game {
