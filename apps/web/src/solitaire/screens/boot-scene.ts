@@ -8,7 +8,7 @@
  * for Phase 3b/4 when it gets pushed in here.
  */
 
-import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
+import { Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
 import type { IScreen, IScreenManager } from '@2817/screen-manager'
 import { parseHex } from '../render/palette'
 import type { SceneServices } from './scene-services'
@@ -23,9 +23,24 @@ export function createBootScene(services: SceneServices): BootScene {
 	const pack = services.pack
 
 	const bg = new Graphics()
-	const logo = new Sprite(Texture.from(assetUrl(pack.brand.logoAsset)))
+	let logoFallback = false
+	const logo = new Sprite(Texture.EMPTY)
 	logo.anchor.set(0.5)
 	logo.alpha = 0
+	logo.visible = false
+	// Fallback wordmark rendered in the logo slot when logoAsset fails to load.
+	const wordmark = new Text({
+		text: pack.brand.title,
+		style: textStyle(pack, 'h1', {
+			fontSize: 30,
+			fill: pack.palette.accent,
+			align: 'center',
+			wordWrap: true,
+			wordWrapWidth: 240,
+		}),
+	})
+	wordmark.anchor.set(0.5, 0.5)
+	wordmark.visible = false
 	const loading = new Text({
 		text: 'DEALING THE DAILY DECK',
 		style: textStyle(pack, 'small', {
@@ -37,6 +52,7 @@ export function createBootScene(services: SceneServices): BootScene {
 
 	display.addChild(bg)
 	display.addChild(logo)
+	display.addChild(wordmark)
 	display.addChild(loading)
 
 	function paintBg(w: number, h: number): void {
@@ -52,8 +68,17 @@ export function createBootScene(services: SceneServices): BootScene {
 		logo.height = logoW * (80 / 300)
 		logo.x = w / 2
 		logo.y = h / 2 - 24
-		loading.x = (w - loading.width) / 2
-		loading.y = logo.y + logo.height / 2 + 28
+		if (logoFallback) {
+			logo.visible = false
+			wordmark.visible = true
+			wordmark.position.set(w / 2, h / 2 - 24)
+			wordmark.style.wordWrapWidth = Math.min(240, logoW)
+			loading.x = (w - loading.width) / 2
+			loading.y = wordmark.y + wordmark.height / 2 + 28
+		} else {
+			loading.x = (w - loading.width) / 2
+			loading.y = logo.y + logo.height / 2 + 28
+		}
 	}
 
 	async function enter(_manager: IScreenManager): Promise<void> {
@@ -74,6 +99,23 @@ export function createBootScene(services: SceneServices): BootScene {
 	function destroy(): void {
 		display.destroy({ children: true })
 	}
+
+	// Async logo load — best-effort. On success: reveal logo. On failure: activate wordmark fallback.
+	void (async () => {
+		try {
+			const tex = await Assets.load<Texture>(assetUrl(pack.brand.logoAsset))
+			logo.texture = tex
+			logo.visible = true
+		} catch (err) {
+			console.warn(
+				`[lgs-solitaire] ${pack.slug}: logo asset unavailable (${pack.brand.logoAsset}) — rendering wordmark fallback`,
+				err,
+			)
+			logoFallback = true
+			const { width, height } = services.getCanvasSize()
+			resize(width, height)
+		}
+	})()
 
 	return {
 		name: 'boot',

@@ -55,7 +55,14 @@ export async function boot(canvas: HTMLCanvasElement): Promise<void> {
 			: []),
 		assetUrl(solitairePack.solitaire.cardBack.texture),
 	]
-	await Assets.load(packAssetUrls)
+	for (const url of packAssetUrls) {
+		try {
+			await Assets.load(url)
+		} catch (err) {
+			// eslint-disable-next-line no-console
+			console.warn('[lgs-solitaire] pack asset failed to preload', { pack: solitairePack.slug, url, err })
+		}
+	}
 
 	const app = new Application()
 	await app.init({

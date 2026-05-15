@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
+import { Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js'
 import type { FederatedPointerEvent } from 'pixi.js'
 import type { IScreen, IScreenManager } from '@2817/screen-manager'
 import {
@@ -37,8 +37,23 @@ export function createCompleteScene(services: SceneServices): CompleteScene {
 	const bg = new Graphics()
 	const confetti = new Graphics()
 	const panel = new Graphics()
-	const logo = new Sprite(Texture.from(assetUrl(pack.brand.logoAsset)))
+	let logoFallback = false
+	const logo = new Sprite(Texture.EMPTY)
 	logo.anchor.set(0.5)
+	logo.visible = false
+	// Fallback wordmark rendered in the logo slot when logoAsset fails to load.
+	const wordmark = new Text({
+		text: pack.brand.title,
+		style: textStyle(pack, 'h1', {
+			fontSize: 26,
+			fill: pack.palette.accent,
+			align: 'center',
+			wordWrap: true,
+			wordWrapWidth: 230,
+		}),
+	})
+	wordmark.anchor.set(0.5, 0.5)
+	wordmark.visible = false
 	const publisherMark = new Text({
 		text: pack.brand.publisherName,
 		style: textStyle(pack, 'h2', { fontSize: 18, fill: pack.palette.accent, fontWeight: '800' }),
@@ -99,7 +114,7 @@ export function createCompleteScene(services: SceneServices): CompleteScene {
 		style: textStyle(pack, 'small', { fontSize: 13, fill: pack.palette.accent, fontWeight: '700' }),
 	})
 	toast.visible = false
-	display.addChild(bg, confetti, panel, logo, publisherMark, heading, timeLabel, parLabel, recordBadge, streakLabel, footer, shareBtn, challengeBtn, titleBtn, toast)
+	display.addChild(bg, confetti, panel, logo, wordmark, publisherMark, heading, timeLabel, parLabel, recordBadge, streakLabel, footer, shareBtn, challengeBtn, titleBtn, toast)
 
 	type Summary = {
 		playerTimeMs: number
@@ -203,11 +218,19 @@ export function createCompleteScene(services: SceneServices): CompleteScene {
 		logo.height = logo.width * (80 / 300)
 		logo.x = w / 2
 		logo.y = panelY + 52
+		logo.visible = !logoFallback
+		if (logoFallback) {
+			wordmark.visible = true
+			wordmark.style.wordWrapWidth = Math.min(230, panelW - 100)
+			wordmark.position.set(w / 2, panelY + 52)
+		} else {
+			wordmark.visible = false
+		}
 		centerText(publisherMark, panelX, panelW)
 		publisherMark.y = panelY + 35
 		heading.style.wordWrapWidth = panelW - 64
 		centerText(heading, panelX, panelW)
-		heading.y = logo.y + logo.height / 2 + 22
+		heading.y = logo.y + (logoFallback ? wordmark.height / 2 : logo.height / 2) + 22
 		centerText(timeLabel, panelX, panelW)
 		timeLabel.y = heading.y + heading.height + 20
 		centerText(parLabel, panelX, panelW)
@@ -292,6 +315,23 @@ export function createCompleteScene(services: SceneServices): CompleteScene {
 	function destroy(): void {
 		display.destroy({ children: true })
 	}
+
+	// Async logo load — best-effort. On success: reveal logo. On failure: activate wordmark fallback.
+	void (async () => {
+		try {
+			const tex = await Assets.load<Texture>(assetUrl(pack.brand.logoAsset))
+			logo.texture = tex
+			logo.visible = true
+		} catch (err) {
+			console.warn(
+				`[lgs-solitaire] ${pack.slug}: logo asset unavailable (${pack.brand.logoAsset}) — rendering wordmark fallback`,
+				err,
+			)
+			logoFallback = true
+			const { width, height } = services.getCanvasSize()
+			resize(width, height)
+		}
+	})()
 
 	return { name: 'complete', display, enter, exit, destroy, resize }
 }
