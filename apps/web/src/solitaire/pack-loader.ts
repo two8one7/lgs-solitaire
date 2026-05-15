@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod'
-import type { SolitaireContentPack } from './types'
+import type { SolitaireContentPack, SolitaireAudioTrack } from './types'
 import { lakenonaPack } from './packs/lakenona'
 import { brochePack } from './packs/broche'
 
@@ -320,6 +320,138 @@ export function validateSolitairePack(raw: unknown): SolitaireContentPack {
 	return result.data as SolitaireContentPack
 }
 
+// ─── Cache-bust helpers ───────────────────────────────────────────────────────
+
+/**
+ * Append `?v=<sha>` (or `&v=<sha>` if the URL already has query params) to a
+ * single asset URL. No-ops when sha is empty so dev mode works without a SHA.
+ */
+export function withCacheBust(url: string, sha: string): string {
+	if (!sha) return url
+	const sep = url.includes('?') ? '&' : '?'
+	return `${url}${sep}v=${encodeURIComponent(sha)}`
+}
+
+/**
+ * Rewrite every pack asset URL field with a cache-bust suffix so that a
+ * Firebase 1-year-immutable 404 response can never stay pinned in browser
+ * cache across deploys.
+ *
+ * Template-literal asset paths (e.g. `${ROOT}/cards/foo.svg`) defeat a
+ * build-time Vite transform because the regex can only match literal string
+ * values. This runtime helper runs after Zod parse and walks the validated
+ * object directly — no regex, no missed fields.
+ *
+ * Schema layer (Zod) stays clean — this transform runs after parse, not before.
+ */
+export function applyPackCacheBust(pack: SolitaireContentPack, sha: string): SolitaireContentPack {
+	if (!sha) return pack
+
+	const bustOrNull = (url: string | null): string | null =>
+		url != null ? withCacheBust(url, sha) : null
+
+	const bustTrack = (track: SolitaireAudioTrack): SolitaireAudioTrack => ({
+		...track,
+		sample: bustOrNull(track.sample),
+	})
+
+	// Walk all 13 audio events
+	const audioEvents = pack.audio.events
+	const bustedEvents = Object.fromEntries(
+		(Object.keys(audioEvents) as (keyof typeof audioEvents)[]).map(event => [
+			event,
+			bustTrack(audioEvents[event]),
+		]),
+	) as typeof audioEvents
+
+	return {
+		...pack,
+		brand: {
+			...pack.brand,
+			logoAsset: withCacheBust(pack.brand.logoAsset, sha),
+		},
+		theme: {
+			...pack.theme,
+			backgroundArt: withCacheBust(pack.theme.backgroundArt, sha),
+		},
+		solitaire: {
+			...pack.solitaire,
+			cardBack: {
+				...pack.solitaire.cardBack,
+				texture: withCacheBust(pack.solitaire.cardBack.texture, sha),
+			},
+			...(pack.solitaire.feltTexture != null
+				? { feltTexture: withCacheBust(pack.solitaire.feltTexture, sha) }
+				: {}),
+		},
+		layout: {
+			...pack.layout,
+			background: {
+				...pack.layout.background,
+				...(pack.layout.background.motifAsset != null
+					? { motifAsset: withCacheBust(pack.layout.background.motifAsset, sha) }
+					: {}),
+			},
+		},
+		juice: {
+			...pack.juice,
+			particles: {
+				correct: {
+					...pack.juice.particles.correct,
+					...(pack.juice.particles.correct.texturePath != null
+						? { texturePath: withCacheBust(pack.juice.particles.correct.texturePath, sha) }
+						: {}),
+				},
+				...(pack.juice.particles.incorrect != null
+					? {
+							incorrect: {
+								...pack.juice.particles.incorrect,
+								...(pack.juice.particles.incorrect.texturePath != null
+									? { texturePath: withCacheBust(pack.juice.particles.incorrect.texturePath, sha) }
+									: {}),
+							},
+						}
+					: {}),
+				...(pack.juice.particles.ambient != null
+					? {
+							ambient: {
+								...pack.juice.particles.ambient,
+								...(pack.juice.particles.ambient.texturePath != null
+									? { texturePath: withCacheBust(pack.juice.particles.ambient.texturePath, sha) }
+									: {}),
+							},
+						}
+					: {}),
+			},
+			transitions: {
+				...pack.juice.transitions,
+				questionEnter: {
+					...pack.juice.transitions.questionEnter,
+					...(pack.juice.transitions.questionEnter.texturePath != null
+						? { texturePath: withCacheBust(pack.juice.transitions.questionEnter.texturePath, sha) }
+						: {}),
+				},
+				...(pack.juice.transitions.questionExit != null
+					? {
+							questionExit: {
+								...pack.juice.transitions.questionExit,
+								...(pack.juice.transitions.questionExit.texturePath != null
+									? { texturePath: withCacheBust(pack.juice.transitions.questionExit.texturePath, sha) }
+									: {}),
+							},
+						}
+					: {}),
+			},
+		},
+		audio: {
+			...pack.audio,
+			events: bustedEvents,
+		},
+	}
+}
+
+// ─── Pack registry + singleton ────────────────────────────────────────────────
+
 function resolvePackSlug(): string {
 	// Literal-member access so Vite's `define` can substitute at build time.
 	const slug =
@@ -329,11 +461,15 @@ function resolvePackSlug(): string {
 }
 
 function loadPackBySlug(slug: string): SolitaireContentPack {
+	// Keep these accesses literal — the casts do not break Vite's static
+	// replacement because Vite walks the AST member chain.
+	const sha: string =
+		((import.meta as unknown as { env: { PUBLIC_BUILD_SHA?: string } }).env.PUBLIC_BUILD_SHA) ?? ''
 	switch (slug) {
 		case 'lakenona':
-			return validateSolitairePack(lakenonaPack)
+			return applyPackCacheBust(validateSolitairePack(lakenonaPack), sha)
 		case 'broche':
-			return validateSolitairePack(brochePack)
+			return applyPackCacheBust(validateSolitairePack(brochePack), sha)
 		default:
 			throw new SolitairePackError(
 				`unknown solitaire pack slug '${slug}' — register it in pack-loader.ts`,
