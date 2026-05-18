@@ -221,4 +221,7 @@ export const lakenonaPack: SolitaireContentPack = {
 		count: 90,
 		spread: 'upward',
 	},
+	assets: {
+		favicon: '/packs/lakenona/branding/favicon.png',
+	},
 }
