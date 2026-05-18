@@ -12,12 +12,16 @@
     "dev": "npm run dev --workspace=@2817/web",
     "prebuild": "npm run lint",
     "build": "npm run build --workspace=@2817/web",
+    "build:broche": "npm run build:broche --workspace=@2817/web && npm run verify:pack-bundle -- broche",
+    "build:lakenona": "npm run build:lakenona --workspace=@2817/web && npm run verify:pack-bundle -- lakenona",
     "preview": "npm run preview --workspace=@2817/web",
     "typecheck": "tsc --noEmit",
+    "test:verify": "node packages/personality-lint/__tests__/verify-pack-bundle.smoke.mjs",
     "test": "vitest run",
     "lint": "npm run lint:no-publisher-ifs && npm run lint:no-literal-title",
     "lint:no-publisher-ifs": "node packages/personality-lint/lint-no-publisher-ifs.mjs apps/web/src",
-    "lint:no-literal-title": "node packages/personality-lint/lint-no-literal-title.mjs apps/web/src/pages/index.astro"
+    "lint:no-literal-title": "node packages/personality-lint/lint-no-literal-title.mjs apps/web/src/pages/index.astro",
+    "verify:pack-bundle": "node packages/personality-lint/verify-pack-bundle.mjs"
   },
   "dependencies": {
     "pixi.js": "^8.14.3",

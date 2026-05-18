@@ -3,9 +3,11 @@
 	"version": "0.0.1",
 	"type": "module",
 	"bin": {
-		"lgs-lint-no-publisher-ifs": "./lint-no-publisher-ifs.mjs"
+		"lgs-lint-no-publisher-ifs": "./lint-no-publisher-ifs.mjs",
+		"lgs-verify-pack-bundle": "./verify-pack-bundle.mjs"
 	},
 	"exports": {
-		"./lint-no-publisher-ifs": "./lint-no-publisher-ifs.mjs"
+		"./lint-no-publisher-ifs": "./lint-no-publisher-ifs.mjs",
+		"./verify-pack-bundle": "./verify-pack-bundle.mjs"
 	}
 }
