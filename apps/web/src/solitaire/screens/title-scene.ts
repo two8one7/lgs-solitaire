@@ -167,8 +167,18 @@ export function createTitleScene(services: SceneServices): TitleScene {
 		const panelY = (h - panelH) / 2
 		drawPanel(panel, panelX, panelY, panelW, panelH, pack)
 
-		logo.width = Math.min(260, panelW - 96)
-		logo.height = logo.width * (80 / 300)
+		// Aspect-preserving fit into MAX_W × MAX_H box. (Refs two8one7/two8one7#80)
+		const tex = logo.texture
+		if (tex && tex.width > 0 && tex.height > 0) {
+			const aspect = tex.height / tex.width
+			const MAX_W = Math.min(260, panelW - 96)
+			const MAX_H = 80
+			let lw = MAX_W
+			let lh = MAX_W * aspect
+			if (lh > MAX_H) { lh = MAX_H; lw = MAX_H / aspect }
+			logo.width = lw
+			logo.height = lh
+		}
 		logo.x = w / 2
 		logo.y = panelY + 60
 
