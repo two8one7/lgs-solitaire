@@ -1,5 +1,5 @@
 // Typography pipeline — resolves font-family, font-weight, letter-spacing,
-// and base font-size from the content pack's personality theme.
+// and font-size from the content pack's personality theme.
 //
 // Two public functions:
 //   loadPackFonts(pack)  — injects a Google Fonts <link> and waits for fonts
@@ -14,6 +14,11 @@
 //     fontSize: 36,        // layout-driven override takes priority
 //     fill: palette.text,  // palette is separate from typography
 //   }})
+//
+// pack.personalityTheme.typography.scale.<role> is the resolved font size in
+// pixels (e.g. scale.h1: 36 → fontSize 36px). When a role is absent from the
+// pack's scale map, BASE_FONT_SIZES[role] is used as the fallback. The mono
+// role always falls back to BASE_FONT_SIZES.mono regardless of pack scale.
 //
 // Fallback chain: pack stack → system-ui / monospace — fonts load failure
 // degrades cleanly to system-ui.
@@ -77,45 +82,45 @@ export function getTextStyle(role: TextRole, pack: ContentPack): ResolvedTextSty
   let fontFamily: string
   let fontWeight: TextStyleFontWeight
   let letterSpacing: number
-  let scaleMult: number
+  let fontSize: number
 
   switch (role) {
     case 'h1':
       fontFamily = t.headingStack
       fontWeight = String(t.weight.heading ?? 700) as TextStyleFontWeight
       letterSpacing = t.tracking.heading ?? 0
-      scaleMult = t.scale.h1 ?? 1
+      fontSize = t.scale.h1 ?? BASE_FONT_SIZES.h1
       break
     case 'h2':
       fontFamily = t.headingStack
       fontWeight = String(t.weight.heading ?? 700) as TextStyleFontWeight
       letterSpacing = t.tracking.heading ?? 0
-      scaleMult = t.scale.h2 ?? 1
+      fontSize = t.scale.h2 ?? BASE_FONT_SIZES.h2
       break
     case 'body':
       fontFamily = t.bodyStack
       fontWeight = String(t.weight.body ?? 400) as TextStyleFontWeight
       letterSpacing = t.tracking.body ?? 0
-      scaleMult = t.scale.body ?? 1
+      fontSize = t.scale.body ?? BASE_FONT_SIZES.body
       break
     case 'small':
       fontFamily = t.bodyStack
       fontWeight = String(t.weight.body ?? 400) as TextStyleFontWeight
       // 'small' uses caps tracking when defined (labels like SCORE, STREAK).
       letterSpacing = t.tracking.caps ?? t.tracking.body ?? 0
-      scaleMult = t.scale.small ?? 1
+      fontSize = t.scale.small ?? BASE_FONT_SIZES.small
       break
     case 'mono':
       fontFamily = t.monoStack
       fontWeight = '400' as TextStyleFontWeight
       letterSpacing = 0
-      scaleMult = 1
+      fontSize = BASE_FONT_SIZES.mono
       break
   }
 
   return {
     fontFamily,
-    fontSize: Math.round(BASE_FONT_SIZES[role] * scaleMult),
+    fontSize,
     fontWeight,
     letterSpacing,
   }
