@@ -308,6 +308,7 @@ const SolitairePackSchema = z.object({
 			width: z.number().optional(),
 		})
 		.optional(),
+	assets: z.object({ favicon: z.string().optional() }).optional(),
 })
 
 export function validateSolitairePack(raw: unknown): SolitaireContentPack {

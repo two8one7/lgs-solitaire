@@ -233,4 +233,7 @@ export const brochePack: SolitaireContentPack = {
 		color: '#C9A66B',
 		width: 200,
 	},
+	assets: {
+		favicon: '/packs/broche/branding/favicon.png',
+	},
 }

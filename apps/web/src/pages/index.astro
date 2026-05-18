@@ -16,6 +16,9 @@ const tagline = solitairePack.brand.tagline;
     <meta name="description" content={tagline} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={tagline} />
+    {solitairePack.assets?.favicon && (
+      <link rel="icon" type="image/png" href={solitairePack.assets.favicon} />
+    )}
     <style define:vars={{ packBg: solitairePack.palette.bg, packText: solitairePack.palette.text }}>
       * {
         margin: 0;

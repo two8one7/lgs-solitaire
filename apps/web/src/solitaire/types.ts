@@ -275,6 +275,12 @@ export interface SolitaireContentPack {
 	share: SolitaireShareBlock
 	winConfetti: WinConfettiConfig
 	flourish?: SolitaireFlourishBlock
+	/** Per-pack public asset paths (favicon, etc.). */
+	assets?: SolitairePackAssets
+}
+
+export interface SolitairePackAssets {
+	favicon?: string
 }
 
 /** Per-publisher, per-date save record. */
