@@ -48,7 +48,7 @@ export function createMoveExecutor(deps: ExecuteMoveDeps) {
 		syncCardPositions(state, cardEntities)
 
 		eventsCenter.dispatch<MoveExecutedEventData>(
-			{ id: MoveExecutedEventId, fromKind: from.type, toKind: to.type },
+			{ id: MoveExecutedEventId, fromKind: from.type, toKind: to.type, from, to },
 			true,
 		)
 		if (to.type === 'foundation' && state.foundations[to.suit]!.length === 13) {

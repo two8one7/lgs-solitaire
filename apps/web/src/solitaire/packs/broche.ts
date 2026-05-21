@@ -110,6 +110,7 @@ export const brochePack: SolitaireContentPack = {
 			scale: 1.05,
 		},
 		motion: {
+			// Slow ballet pace at 1.4 against lakenona 0.88 (Δ 0.52 ≥ 0.4).
 			durationMultiplier: 1.4,
 			easing: {
 				entrance: 'easeInOutCubic',
@@ -117,6 +118,20 @@ export const brochePack: SolitaireContentPack = {
 				feedback: 'easeInOutSine',
 				transition: 'easeInOutQuart',
 				ambient: 'easeInOutSine',
+			},
+			// Broche = deliberate ballet: longer durations, smooth Quart/Quint curves.
+			// Every duration + every easing slot differs from lakenona (stranger-pair gate).
+			staggerMs: 110,
+			popMs: 340,
+			shakeMs: 360,
+			sweepMs: 880,
+			popEase: 'easeInOutQuart',
+			shakeEase: 'easeInOutSine',
+			sweepEase: 'easeInOutQuint',
+			entranceEase: 'easeInOutCubic',
+			winPulse: {
+				durationMs: 820,
+				scale: 1.32,
 			},
 		},
 		surface: {

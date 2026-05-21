@@ -164,6 +164,25 @@ export interface SolitairePersonalityTheme {
 			transition: EasingName
 			ambient: EasingName
 		}
+		/**
+		 * Per-moment timing keys for the Phase 3 juice fan-out. Optional so older
+		 * packs without these fields stay valid; juice helpers fall back to baked
+		 * defaults when absent.
+		 */
+		staggerMs?: number
+		popMs?: number
+		shakeMs?: number
+		sweepMs?: number
+		/** Per-moment easing slots. Layer on top of the per-class easing block. */
+		popEase?: EasingName
+		shakeEase?: EasingName
+		sweepEase?: EasingName
+		entranceEase?: EasingName
+		/** Win heading pulse — independent duration/scale from the per-class block. */
+		winPulse?: {
+			durationMs: number
+			scale: number
+		}
 	}
 	surface: {
 		panelFill: string

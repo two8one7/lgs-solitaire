@@ -60,6 +60,10 @@ export interface MoveExecutedEventData extends IEventData {
 	readonly id: typeof MoveExecutedEventId
 	fromKind: string
 	toKind: string
+	/** Source location of the move (added Phase 3 for juice targeting). */
+	from?: CardLocation
+	/** Destination location of the move (added Phase 3 for juice targeting). */
+	to?: CardLocation
 }
 export const MoveExecutedEventId =
 	createTypedId<MoveExecutedEventData>('solitaire:move-executed')
@@ -67,6 +71,8 @@ export const MoveExecutedEventId =
 export interface MoveRejectedEventData extends IEventData {
 	readonly id: typeof MoveRejectedEventId
 	reason: string
+	/** Source location of the failed move (added Phase 3 for juice targeting). */
+	from?: CardLocation
 }
 export const MoveRejectedEventId =
 	createTypedId<MoveRejectedEventData>('solitaire:move-rejected')

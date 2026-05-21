@@ -220,7 +220,7 @@ export function createInputSystem(deps: InputSystemDeps) {
 		const validateErr = validateMove(state, from, to, count)
 		if (validateErr) {
 			eventsCenter.dispatch<MoveRejectedEventData>(
-				{ id: MoveRejectedEventId, reason: validateErr },
+				{ id: MoveRejectedEventId, reason: validateErr, from },
 				true,
 			)
 			// Illegal target — try to swap selection if the new tap is selectable.

@@ -13,15 +13,22 @@ import type { RenderContext } from './render-context'
 import { CBoardState, CSelectedCardRef } from '../components'
 import type { SolitaireBoardState } from '../logic/types'
 import {
+	CardPickupEventId,
 	CardTapEventId,
 	LocationTapEventId,
+	MoveExecutedEventId,
+	MoveRejectedEventId,
 	StockTapEventId,
+	type CardPickupEventData,
 	type CardTapEventData,
 	type LocationTapEventData,
+	type MoveExecutedEventData,
+	type MoveRejectedEventData,
 	type StockTapEventData,
 } from '../events'
 import { createCardVisual, type CardVisual } from './card-visual'
 import { parseHex } from './palette'
+import { flash, motionDurationMs, pulseScale, shake, vibrate } from '../render-personality/juice'
 
 export type StockWasteRenderDeps = {
 	parent: Container
@@ -99,6 +106,13 @@ export function createStockWasteRender(deps: StockWasteRenderDeps) {
 	const wasteCard: CardVisual = createCardVisual(context.palette)
 	wasteContainer.addChild(wasteCard.container)
 
+	// Per-card flash overlays — one each for waste source feedback.
+	const wasteFlash = new Graphics()
+	wasteFlash.eventMode = 'none'
+	wasteFlash.visible = false
+	wasteFlash.alpha = 0
+	wasteContainer.addChild(wasteFlash)
+
 	function render(): void {
 		const board = context.entities.board
 		const bWi = board.worldIndex
@@ -156,5 +170,94 @@ export function createStockWasteRender(deps: StockWasteRenderDeps) {
 		}
 	}
 
-	return { layer, render }
+	const incorrectColor = parseHex(context.pack.palette.incorrect)
+
+	function paintFlashRect(g: Graphics, w: number, h: number, radius: number, color: number): void {
+		g.clear()
+		g.roundRect(0, 0, w, h, radius)
+		g.fill({ color, alpha: 0.78 })
+	}
+
+	// Moment 3 — squash when waste card is picked up.
+	const unsubPickup = context.eventsCenter.addListener<CardPickupEventData>(
+		CardPickupEventId,
+		(data) => {
+			if (data.source !== 'waste') return
+			void pulseScale(wasteCard.content, {
+				from: 1,
+				peak: 0.94,
+				rest: 1,
+				baseMs: motionDurationMs(context.pack, 'popMs', 180),
+				eventClass: 'feedback',
+				pack: context.pack,
+			})
+		},
+	)
+
+	// Stock-tap micro-pulse — light feedback when player draws/recycles.
+	const unsubStockTap = context.eventsCenter.addListener<StockTapEventData>(
+		StockTapEventId,
+		() => {
+			void pulseScale(stockCard.content, {
+				from: 1,
+				peak: 0.96,
+				rest: 1,
+				baseMs: motionDurationMs(context.pack, 'popMs', 160),
+				eventClass: 'feedback',
+				pack: context.pack,
+			})
+		},
+	)
+
+	// Moment 4b — shake the waste source card when the player's selected waste
+	// move is rejected.
+	const unsubReject = context.eventsCenter.addListener<MoveRejectedEventData>(
+		MoveRejectedEventId,
+		(data) => {
+			if (!data.from || data.from.type !== 'waste') return
+			const layout = context.getLayout()
+			const radius = context.pack.personalityTheme.shape.cornerRadius.md
+			vibrate(20)
+			void shake(wasteCard.shakeWrap, {
+				amplitude: context.pack.juice.shake.incorrect.amplitude ?? 4,
+				cycles: 3,
+				baseMs: motionDurationMs(context.pack, 'shakeMs', 200),
+				pack: context.pack,
+				axis: 'horizontal',
+			})
+			paintFlashRect(wasteFlash, layout.cardWidth, layout.cardHeight, radius, incorrectColor)
+			void flash(wasteFlash, {
+				baseMs: motionDurationMs(context.pack, 'shakeMs', 220),
+				pack: context.pack,
+				eventClass: 'feedback',
+			})
+		},
+	)
+
+	// Moment 4a (waste-source success leg) — when MoveExecuted's source is
+	// waste, the waste top card briefly pulses out (so the player sees their
+	// source acknowledge).
+	const unsubMove = context.eventsCenter.addListener<MoveExecutedEventData>(
+		MoveExecutedEventId,
+		(data) => {
+			if (!data.from || data.from.type !== 'waste') return
+			void pulseScale(wasteCard.content, {
+				from: 1,
+				peak: 1.04,
+				rest: 1,
+				baseMs: motionDurationMs(context.pack, 'popMs', 180),
+				eventClass: 'feedback',
+				pack: context.pack,
+			})
+		},
+	)
+
+	function destroy(): void {
+		unsubPickup?.()
+		unsubStockTap?.()
+		unsubReject?.()
+		unsubMove?.()
+	}
+
+	return { layer, render, destroy }
 }

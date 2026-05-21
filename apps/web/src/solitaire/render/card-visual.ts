@@ -21,7 +21,25 @@ import { cardLabel, isRedSuit, suitGlyph } from '../logic/deck'
 import type { RenderPalette } from './palette'
 
 export type CardVisual = {
+	/**
+	 * Outer container — render systems read/write x, y, scale here per frame for
+	 * layout + selection scaling. Animations that race the layout writes MUST
+	 * target an inner layer instead (see content/shakeWrap below).
+	 */
 	container: Container
+	/**
+	 * Wraps `content`; reserved for translate-style juice (e.g. shake on a
+	 * MoveRejected). Layout writes never touch shakeWrap.x/y, so a shake
+	 * animation does not fight per-frame layout writes the way root.x/y would.
+	 */
+	shakeWrap: Container
+	/**
+	 * Holds bg/frame/text/sprite — the visual body of the card. Centered via
+	 * pivot so scale animations (squash, win pulse) pivot around the card's
+	 * center. Layout writes never touch content.scale, so juice writes don't
+	 * race the render loop (lgs-trivia@bd8e097 load-bearing rule).
+	 */
+	content: Container
 	bg: Graphics
 	frame: Graphics
 	cornerTL: Text
@@ -48,18 +66,32 @@ const CORNER_FONT = 'Georgia, "Times New Roman", serif'
 export function createCardVisual(palette: RenderPalette): CardVisual {
 	const container = new Container()
 
+	// Three-layer hierarchy: container → shakeWrap → content.
+	//   - container (root): render-loop owns x/y/scale per frame.
+	//   - shakeWrap: shake juice writes x/y; layout never touches it.
+	//   - content: holds visuals; juice writes content.scale; layout never
+	//     touches it. Pivot/position set in apply() so scale pulses pivot
+	//     around the card center even though bg/frame draw at (0,0).
+	const shakeWrap = new Container()
+	shakeWrap.eventMode = 'none'
+	container.addChild(shakeWrap)
+
+	const content = new Container()
+	content.eventMode = 'none'
+	shakeWrap.addChild(content)
+
 	const bg = new Graphics()
 	bg.eventMode = 'none'
-	container.addChild(bg)
+	content.addChild(bg)
 
 	const frame = new Graphics()
 	frame.eventMode = 'none'
-	container.addChild(frame)
+	content.addChild(frame)
 
 	const backSprite = new Sprite(Texture.EMPTY)
 	backSprite.eventMode = 'none'
 	backSprite.visible = false
-	container.addChild(backSprite)
+	content.addChild(backSprite)
 
 	const cornerTL = new Text({
 		text: '',
@@ -71,7 +103,7 @@ export function createCardVisual(palette: RenderPalette): CardVisual {
 		},
 	})
 	cornerTL.anchor.set(0, 0)
-	container.addChild(cornerTL)
+	content.addChild(cornerTL)
 
 	const cornerBR = new Text({
 		text: '',
@@ -83,7 +115,7 @@ export function createCardVisual(palette: RenderPalette): CardVisual {
 		},
 	})
 	cornerBR.anchor.set(1, 1)
-	container.addChild(cornerBR)
+	content.addChild(cornerBR)
 
 	const centerGlyph = new Text({
 		text: '',
@@ -95,7 +127,7 @@ export function createCardVisual(palette: RenderPalette): CardVisual {
 		},
 	})
 	centerGlyph.anchor.set(0.5)
-	container.addChild(centerGlyph)
+	content.addChild(centerGlyph)
 
 	function apply(
 		card: SolitaireCard | null,
@@ -105,6 +137,12 @@ export function createCardVisual(palette: RenderPalette): CardVisual {
 	): void {
 		bg.clear()
 		frame.clear()
+		// Re-center content's pivot/position every apply so squash pulses anchor
+		// at the card center even as widths/heights change with responsive layout.
+		// bg/frame still draw at (0, 0) → (w, h); pivot just shifts the local
+		// origin for scale ops without moving the rendered position.
+		content.pivot.set(width / 2, height / 2)
+		content.position.set(width / 2, height / 2)
 		const radius = opts?.radius ?? Math.max(4, Math.round(Math.min(width, height) * 0.09))
 		const highlighted = opts?.highlighted ?? false
 		const dim = opts?.dim ?? false
@@ -190,6 +228,8 @@ export function createCardVisual(palette: RenderPalette): CardVisual {
 
 	return {
 		container,
+		shakeWrap,
+		content,
 		bg,
 		frame,
 		cornerTL,

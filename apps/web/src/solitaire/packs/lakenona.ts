@@ -105,13 +105,27 @@ export const lakenonaPack: SolitaireContentPack = {
 			scale: 1,
 		},
 		motion: {
-			durationMultiplier: 0.92,
+			// Snap-down to 0.88 against broche's 1.4 (Δ 0.52 ≥ 0.4 stranger-pair gate).
+			durationMultiplier: 0.88,
 			easing: {
 				entrance: 'easeOutCubic',
 				exit: 'easeInOutSine',
 				feedback: 'easeOutBack',
 				transition: 'easeInOutCubic',
 				ambient: 'easeInOutSine',
+			},
+			// Lake Nona = brisk civic-news energy: short durations, easeOutBack/Quad snap.
+			staggerMs: 55,
+			popMs: 180,
+			shakeMs: 200,
+			sweepMs: 520,
+			popEase: 'easeOutBack',
+			shakeEase: 'easeOutQuad',
+			sweepEase: 'easeOutCubic',
+			entranceEase: 'easeOutBack',
+			winPulse: {
+				durationMs: 460,
+				scale: 1.22,
 			},
 		},
 		surface: {

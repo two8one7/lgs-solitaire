@@ -12,7 +12,7 @@
  * onto the eventsCenter; input-system + stock-cycle listen for them.
  */
 
-import { Container, Graphics, Sprite, Texture } from 'pixi.js'
+import { Container, Graphics, Sprite, Text, Texture, type TextStyleFontWeight } from 'pixi.js'
 import { createQuery } from '@2817/ecs'
 import type { IScreen, IScreenManager } from '@2817/screen-manager'
 import type { SceneServices } from './scene-services'
@@ -29,13 +29,12 @@ import {
 	DailyCompleteEventId,
 	FoundationCompletedEventId,
 	MoveExecutedEventId,
-	MoveRejectedEventId,
 	type DailyCompleteEventData,
 	type FoundationCompletedEventData,
 	type MoveExecutedEventData,
-	type MoveRejectedEventData,
 } from '../events'
 import { assetUrl } from './ui'
+import { fadeIn, playWinPulse } from '../render-personality/juice'
 
 export type PlayingScene = IScreen & {
 	resize: (w: number, h: number) => void
@@ -76,8 +75,25 @@ export function createPlayingScene(services: SceneServices): PlayingScene {
 	let completedRouted = false
 	type Particle = { g: Graphics; vx: number; vy: number; gravity: number; age: number; life: number }
 	const particles: Particle[] = []
-	let shakeMs = 0
-	let shakeElapsed = 0
+
+	// Header brand text — wraps the pack's shortName for the title fadeIn moment.
+	// Lives on its own Container so the fadeIn animation owns alpha/scale.
+	const brandWrap = new Container()
+	brandWrap.eventMode = 'none'
+	display.addChild(brandWrap)
+	const headingWeight = String(pack.personalityTheme.typography.weight.heading) as TextStyleFontWeight
+	const brandText = new Text({
+		text: pack.brand.shortName,
+		style: {
+			fill: parseHex(pack.palette.text),
+			fontFamily: pack.personalityTheme.typography.headingStack,
+			fontSize: 22,
+			fontWeight: headingWeight,
+			letterSpacing: pack.personalityTheme.typography.tracking.heading,
+		},
+	})
+	brandText.anchor.set(0.5, 0)
+	brandWrap.addChild(brandText)
 
 	function colorFromPack(name: string | undefined): number {
 		if (!name) return parseHex(pack.palette.accentAlt)
@@ -163,18 +179,15 @@ export function createPlayingScene(services: SceneServices): PlayingScene {
 			emitPackParticles('correct', rect.x + rect.width / 2, rect.y + rect.height / 2)
 		},
 	)
-	const unsubRejected = runtime.eventsCenter.addListener<MoveRejectedEventData>(
-		MoveRejectedEventId,
-		() => {
-			shakeMs = pack.juice.shake.incorrect.ms
-			shakeElapsed = 0
-		},
-	)
+	// Moment 6 — pulse the brand text on the win moment. Shake on rejected
+	// moves now lives per-card in tableau-render / stock-waste-render, so the
+	// global display-shake is gone.
 	const unsubComplete = runtime.eventsCenter.addListener<DailyCompleteEventData>(
 		DailyCompleteEventId,
 		() => {
 			const { width, height } = services.getCanvasSize()
 			emitPackParticles('correct', width / 2, height * 0.42)
+			void playWinPulse(brandWrap, pack)
 		},
 	)
 
@@ -184,6 +197,10 @@ export function createPlayingScene(services: SceneServices): PlayingScene {
 		bg.fill({ color: parseHex(pack.solitaire.feltColor) })
 		felt.width = w
 		felt.height = h
+		// Position brand text in the header band — center top with a small
+		// inset so it sits inside the header slot like the canonical packs.
+		brandWrap.x = w / 2
+		brandWrap.y = 12
 	}
 
 	function renderAll(): void {
@@ -201,13 +218,6 @@ export function createPlayingScene(services: SceneServices): PlayingScene {
 	function update(dt: number): void {
 		runtime.tick(dt)
 		updateParticles(dt)
-		if (shakeElapsed < shakeMs) {
-			shakeElapsed += dt * 1000
-			const amp = pack.juice.shake.incorrect.amplitude * (1 - shakeElapsed / shakeMs)
-			display.x = Math.sin(shakeElapsed * 0.08) * amp
-		} else {
-			display.x = 0
-		}
 		renderAll()
 
 		if (!completedRouted && completedQ().length > 0) {
@@ -222,6 +232,20 @@ export function createPlayingScene(services: SceneServices): PlayingScene {
 	async function enter(_manager: IScreenManager): Promise<void> {
 		const { width, height } = services.getCanvasSize()
 		resize(width, height)
+		// Moment 1 — title brand fadeIn. Runs the pack's entrance easing over
+		// roughly two pop-windows so the brand settles before the deal starts.
+		void fadeIn(brandWrap, {
+			fromAlpha: 0,
+			toAlpha: 1,
+			fromScale: 0.94,
+			toScale: 1,
+			baseMs: 520,
+			eventClass: 'entrance',
+			pack,
+		})
+		// Moment 2 — staggered tableau deal entrance. Render has populated the
+		// CardVisual grid by the time this runs (resize → renderAll above).
+		tableau.playDealEntrance()
 	}
 
 	async function exit(_manager: IScreenManager): Promise<void> {
@@ -231,8 +255,10 @@ export function createPlayingScene(services: SceneServices): PlayingScene {
 	function destroy(): void {
 		unsubMove?.()
 		unsubFoundation?.()
-		unsubRejected?.()
 		unsubComplete?.()
+		tableau.destroy?.()
+		foundations.destroy?.()
+		stockWaste.destroy?.()
 		display.destroy({ children: true })
 	}
 

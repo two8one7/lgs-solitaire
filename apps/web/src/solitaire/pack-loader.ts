@@ -246,6 +246,24 @@ const PersonalityThemeSchema = z.object({
 			transition: EasingNameSchema,
 			ambient: EasingNameSchema,
 		}),
+		// Phase 3 juice fan-out per-moment keys. Optional so older packs stay
+		// valid; juice helpers fall back to baked defaults when absent.
+		// MUST be declared here — Zod strips unknown fields by default and the
+		// juice layer would silently see undefined for fields the pack declares.
+		staggerMs: z.number().nonnegative().optional(),
+		popMs: z.number().nonnegative().optional(),
+		shakeMs: z.number().nonnegative().optional(),
+		sweepMs: z.number().nonnegative().optional(),
+		popEase: EasingNameSchema.optional(),
+		shakeEase: EasingNameSchema.optional(),
+		sweepEase: EasingNameSchema.optional(),
+		entranceEase: EasingNameSchema.optional(),
+		winPulse: z
+			.object({
+				durationMs: z.number().positive(),
+				scale: z.number().positive(),
+			})
+			.optional(),
 	}),
 	surface: z.object({
 		panelFill: z.string(),
